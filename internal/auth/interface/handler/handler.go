@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/domain/entity"
+	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/middleware"
 	usecase "github.com/3-Orang-IT/tekna-erp-api/internal/auth/usecase"
+	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,10 +17,13 @@ type AuthHandler struct {
 
 func NewAuthHandler(r *gin.Engine, uc usecase.AuthUsecase) {
     h := &AuthHandler{uc}
-    api := r.Group("/api/v1/auth")
-    api.POST("/register", h.Register)
-    api.POST("/login", h.Login)
-    api.GET("/menus/:role_id", h.GetMenus)
+    api := r.Group("/api/v1")
+    api.POST("/auth/register", h.Register)
+    api.POST("/auth/login", h.Login)
+
+    protected := api.Group("/")
+    protected.Use(middleware.JWTAuthMiddleware())
+    protected.GET("/menus", h.GetMenus)
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -53,13 +58,32 @@ func (h *AuthHandler) Login(c *gin.Context) {
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{"user": user})
+    token, err := utils.GenerateToken(user.ID, user.RoleID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "token": token,
+        "user":  user,
+    })
 }
 
 func (h *AuthHandler) GetMenus(c *gin.Context) {
     // ambil role id dari path
-    roleID := c.Param("role_id")
-    menus, err := h.usecase.GetMenus(parseUint(roleID))
+    roleIDInterface, exists := c.Get("roleID")
+    if !exists {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Role ID not found in token"})
+        return
+    }
+    roleID, ok := roleIDInterface.(uint)
+    if !ok {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid role ID type"})
+        return
+    }
+
+    menus, err := h.usecase.GetMenus(roleID)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
