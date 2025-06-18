@@ -8,7 +8,7 @@ type User struct {
     Email     string    `gorm:"uniqueIndex;size:100" json:"email"`
     Password  string    `json:"password"`
     RoleID    uint      `json:"role_id"`
-    Role      Role      `json:"role"` 
+    Role      []Role    `gorm:"many2many:user_roles;"` 
     CreatedAt time.Time `json:"created_at"`
     UpdatedAt time.Time `json:"updated_at"`
 }

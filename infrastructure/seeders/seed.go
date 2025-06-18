@@ -11,7 +11,9 @@ func Seed(db *gorm.DB) {
     // Seed roles
     roles := []entity.Role{
         {Name: "Admin"},
-        {Name: "User"},
+        {Name: "Team Support"},
+        {Name: "HRD"},
+        {Name: "Supplier"},
     }
 
     for _, role := range roles {
@@ -27,14 +29,14 @@ func Seed(db *gorm.DB) {
     }
 
     // Fetch roles to associate with users
-    var adminRole, userRole entity.Role
+    var adminRole, teamSupportRole entity.Role
     db.Where("name = ?", "Admin").First(&adminRole)
-    db.Where("name = ?", "User").First(&userRole)
+    db.Where("name = ?", "Team Support").First(&teamSupportRole)
 
     // Seed users
     users := []entity.User{
         {Name: "Admin", Email: "admin@example.com", Password: "hashed_password", RoleID: adminRole.ID},
-        {Name: "User", Email: "user@example.com", Password: "hashed_password", RoleID: userRole.ID},
+        {Name: "User", Email: "user@example.com", Password: "hashed_password", RoleID: teamSupportRole.ID},
     }
 
     for _, user := range users {

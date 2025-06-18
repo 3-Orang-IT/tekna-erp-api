@@ -34,6 +34,10 @@ func (h *AuthHandler) Register(c *gin.Context) {
     }
 
     if err := h.usecase.Register(&user); err != nil {
+        if err.Error() == "email already registered" {
+            c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+            return
+        }
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
@@ -64,9 +68,24 @@ func (h *AuthHandler) Login(c *gin.Context) {
         return
     }
 
+    roles := []gin.H{}
+    for _, role := range user.Role {
+        roles = append(roles, gin.H{
+            "id":   role.ID,
+            "name": role.Name,
+        })
+    }
+
     c.JSON(http.StatusOK, gin.H{
-        "token": token,
-        "user":  user,
+        "data" : gin.H{
+            "token": token,
+            "user":  gin.H{
+                "id":    user.ID,
+                "name":  user.Name,
+                "email": user.Email,
+                "role": roles,
+            },
+        },
     })
 }
 
