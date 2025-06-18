@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 
-	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/domain/entity"
+	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/domain/repository"
 	"gorm.io/gorm"
 )

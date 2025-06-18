@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/domain/entity"
+	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/domain/repository"
 	"golang.org/x/crypto/bcrypt"
 )

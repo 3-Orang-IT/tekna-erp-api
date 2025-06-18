@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/domain/entity"
+	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/middleware"
 	usecase "github.com/3-Orang-IT/tekna-erp-api/internal/auth/usecase"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/utils"
