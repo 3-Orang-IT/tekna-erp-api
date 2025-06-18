@@ -9,20 +9,21 @@ import (
 	usecase "github.com/3-Orang-IT/tekna-erp-api/internal/auth/usecase"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/utils"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type AuthHandler struct {
     usecase usecase.AuthUsecase
 }
 
-func NewAuthHandler(r *gin.Engine, uc usecase.AuthUsecase) {
+func NewAuthHandler(r *gin.Engine, uc usecase.AuthUsecase, db *gorm.DB) {
     h := &AuthHandler{uc}
     api := r.Group("/api/v1")
     api.POST("/auth/register", h.Register)
     api.POST("/auth/login", h.Login)
 
     protected := api.Group("/")
-    protected.Use(middleware.JWTAuthMiddleware())
+    protected.Use(middleware.JWTAuthMiddleware(db))
     protected.GET("/menus", h.GetMenus)
 }
 
@@ -62,7 +63,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
         return
     }
 
-    token, err := utils.GenerateToken(user.ID, user.RoleID)
+    token, err := utils.GenerateToken(user.ID)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
         return
@@ -90,19 +91,19 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func (h *AuthHandler) GetMenus(c *gin.Context) {
-    // ambil role id dari path
-    roleIDInterface, exists := c.Get("roleID")
+    userIdInterface, exists := c.Get("userID")
     if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "Role ID not found in token"})
-        return
-    }
-    roleID, ok := roleIDInterface.(uint)
-    if !ok {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid role ID type"})
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
         return
     }
 
-    menus, err := h.usecase.GetMenus(roleID)
+    userID, ok := userIdInterface.(uint)
+    if !ok {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+        return
+    }
+
+    menus, err := h.usecase.GetMenus(userID)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
@@ -110,6 +111,8 @@ func (h *AuthHandler) GetMenus(c *gin.Context) {
 
     c.JSON(http.StatusOK, menus)
 }
+
+
 
 func parseUint(str string) uint {
     var i uint

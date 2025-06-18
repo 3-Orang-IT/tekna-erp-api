@@ -35,10 +35,22 @@ func (r *authRepo) FindByEmail(email string) (*entity.User, error) {
     return &user, nil
 }
 
-func (r *authRepo) GetMenusByRoleID(roleID uint) ([]entity.Menu, error) {
-    var role entity.Role
-    if err := r.db.Preload("Menus").First(&role, roleID).Error; err != nil {
+func (r *authRepo) GetMenusByUserID(userID uint) ([]entity.Menu, error) {
+    var menus []entity.Menu
+
+    err := r.db.
+        Distinct().
+        Table("menus").
+        Joins("JOIN role_menus ON role_menus.menu_id = menus.id").
+        Joins("JOIN user_roles ON user_roles.role_id = role_menus.role_id").
+        Where("user_roles.user_id = ?", userID).
+        Find(&menus).Error
+
+    if err != nil {
         return nil, err
     }
-    return role.Menus, nil
+
+    return menus, nil
 }
+
+

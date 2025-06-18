@@ -29,25 +29,25 @@ func Seed(db *gorm.DB) {
     }
 
     // Fetch roles to associate with users
-    var adminRole, teamSupportRole entity.Role
-    db.Where("name = ?", "Admin").First(&adminRole)
-    db.Where("name = ?", "Team Support").First(&teamSupportRole)
+    // var adminRole, teamSupportRole entity.Role
+    // db.Where("name = ?", "Admin").First(&adminRole)
+    // db.Where("name = ?", "Team Support").First(&teamSupportRole)
 
-    // Seed users
-    users := []entity.User{
-        {Name: "Admin", Email: "admin@example.com", Password: "hashed_password", RoleID: adminRole.ID},
-        {Name: "User", Email: "user@example.com", Password: "hashed_password", RoleID: teamSupportRole.ID},
-    }
+    // // Seed users
+    // users := []entity.User{
+    //     {Name: "Admin", Email: "admin@example.com", Password: "hashed_password", RoleID: adminRole.ID},
+    //     {Name: "User", Email: "user@example.com", Password: "hashed_password", RoleID: teamSupportRole.ID},
+    // }
 
-    for _, user := range users {
-        var u entity.User
-        result := db.Where("email = ?", user.Email).First(&u)
-        if result.Error == gorm.ErrRecordNotFound {
-            if err := db.Create(&user).Error; err != nil {
-                log.Printf("Gagal membuat user %s: %v", user.Email, err)
-            } else {
-                log.Printf("Berhasil menambahkan user %s", user.Email)
-            }
-        }
-    }
+    // for _, user := range users {
+    //     var u entity.User
+    //     result := db.Where("email = ?", user.Email).First(&u)
+    //     if result.Error == gorm.ErrRecordNotFound {
+    //         if err := db.Create(&user).Error; err != nil {
+    //             log.Printf("Gagal membuat user %s: %v", user.Email, err)
+    //         } else {
+    //             log.Printf("Berhasil menambahkan user %s", user.Email)
+    //         }
+    //     }
+    // }
 }

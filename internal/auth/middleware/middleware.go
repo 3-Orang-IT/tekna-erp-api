@@ -1,14 +1,16 @@
 package middleware
 
 import (
-    "net/http"
-    "strings"
+	"net/http"
+	"strings"
 
-    "github.com/gin-gonic/gin"
-    "github.com/3-Orang-IT/tekna-erp-api/internal/auth/utils"
+	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/domain/entity"
+	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/utils"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func JWTAuthMiddleware() gin.HandlerFunc {
+func JWTAuthMiddleware(db *gorm.DB) gin.HandlerFunc {
     return func(c *gin.Context) {
         authHeader := c.GetHeader("Authorization")
         if authHeader == "" {
@@ -32,8 +34,14 @@ func JWTAuthMiddleware() gin.HandlerFunc {
             return
         }
 
+        var user entity.User
+        if err := db.Preload("Role").First(&user, claims.UserID).Error; err != nil {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+            c.Abort()
+            return
+        }
+
         c.Set("userID", claims.UserID)
-        c.Set("roleID", claims.RoleID)
         c.Next()
     }
 }

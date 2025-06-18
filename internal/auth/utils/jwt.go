@@ -1,22 +1,22 @@
 package utils
 
 import (
-    "time"
-    "github.com/golang-jwt/jwt/v5"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var jwtKey = []byte("RAHASIA_SANGAT_AMAN") // Ganti dengan env nanti
 
 type Claims struct {
     UserID uint `json:"user_id"`
-    RoleID uint `json:"role_id"`
     jwt.RegisteredClaims
 }
 
-func GenerateToken(userID, roleID uint) (string, error) {
+func GenerateToken(userID uint) (string, error) {
+
     claims := &Claims{
         UserID: userID,
-        RoleID: roleID,
         RegisteredClaims: jwt.RegisteredClaims{
             ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
         },
@@ -25,6 +25,7 @@ func GenerateToken(userID, roleID uint) (string, error) {
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
     return token.SignedString(jwtKey)
 }
+
 
 func ValidateToken(tokenString string) (*Claims, error) {
     token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {

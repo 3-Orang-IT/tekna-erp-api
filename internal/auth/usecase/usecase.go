@@ -12,7 +12,7 @@ import (
 type AuthUsecase interface {
     Register(user *entity.User) error
     Login(email, password string) (*entity.User, error)
-    GetMenus(roleID uint) ([]entity.Menu, error)
+    GetMenus(userId uint) ([]entity.Menu, error)
 }
 
 type authUsecase struct {
@@ -59,6 +59,6 @@ func (u *authUsecase) Login(email, password string) (*entity.User, error) {
 }
 
 
-func (u *authUsecase) GetMenus(roleID uint) ([]entity.Menu, error) {
-    return u.repo.GetMenusByRoleID(roleID)
+func (u *authUsecase) GetMenus(userId uint) ([]entity.Menu, error) {
+    return u.repo.GetMenusByUserID(userId)
 }
