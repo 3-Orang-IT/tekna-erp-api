@@ -41,8 +41,8 @@ func (u *authUsecase) Register(user *entity.User) error {
     return nil
 }
 
-func (u *authUsecase) Login(email, password string) (*entity.User, error) {
-    user, err := u.repo.FindByEmail(email)
+func (u *authUsecase) Login(username, password string) (*entity.User, error) {
+    user, err := u.repo.FindByUsername(username)
     if err != nil {
         return nil, fmt.Errorf("invalid credentials")
     }

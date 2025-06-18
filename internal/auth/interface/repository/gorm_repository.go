@@ -27,9 +27,9 @@ func (r *authRepo) Register(user *entity.User) error {
     return r.db.Create(user).Error
 }
 
-func (r *authRepo) FindByEmail(email string) (*entity.User, error) {
+func (r *authRepo) FindByUsername(username string) (*entity.User, error) {
     var user entity.User
-    if err := r.db.Preload("Role").Where("email = ?", email).First(&user).Error; err != nil {
+    if err := r.db.Preload("Role").Where("username = ?", username).First(&user).Error; err != nil {
         return nil, err
     }
     return &user, nil

@@ -48,7 +48,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 func (h *AuthHandler) Login(c *gin.Context) {
     var input struct {
-        Email    string `json:"email"`
+        Username    string `json:"username"`
         Password string `json:"password"`
     }
 
@@ -57,7 +57,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
         return
     }
 
-    user, err := h.usecase.Login(input.Email, input.Password)
+    user, err := h.usecase.Login(input.Username, input.Password)
     if err != nil {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
         return
