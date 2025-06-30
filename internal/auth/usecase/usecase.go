@@ -11,7 +11,7 @@ import (
 
 type AuthUsecase interface {
     Register(user *entity.User) error
-    Login(email, password string) (*entity.User, error)
+    Login(username, password string) (*entity.User, error)
     GetMenus(userId uint) ([]entity.Menu, error)
 }
 

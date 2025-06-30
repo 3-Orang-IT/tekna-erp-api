@@ -4,19 +4,20 @@ import (
 	"log"
 
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 func Seed(db *gorm.DB) {
 	// Seed roles
-	roles := []entity.Role{
+	rolesList := []entity.Role{
 		{Name: "Admin"},
 		{Name: "Team Support"},
 		{Name: "HRD"},
 		{Name: "Supplier"},
 	}
 
-	for _, role := range roles {
+	for _, role := range rolesList {
 		var r entity.Role
 		result := db.Where("name = ?", role.Name).First(&r)
 		if result.Error == gorm.ErrRecordNotFound {
@@ -28,14 +29,22 @@ func Seed(db *gorm.DB) {
 		}
 	}
 
+	// Seed user with all roles
+	var roles []entity.Role
 	if err := db.Find(&roles).Error; err != nil {
 		log.Printf("Gagal mengambil roles: %v", err)
 		return
 	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("securepassword"), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("Gagal mengenkripsi password: %v", err)
+		return
+	}
+
 	user := entity.User{
 		Username: "admin_user",
-		Password: "securepassword", // Replace with hashed password in production
+		Password: string(hashedPassword),
 		Name:     "Admin User",
 		Email:    "admin@example.com",
 		Telp:     "123456789",
