@@ -8,46 +8,48 @@ import (
 )
 
 func Seed(db *gorm.DB) {
-    // Seed roles
-    roles := []entity.Role{
-        {Name: "Admin"},
-        {Name: "Team Support"},
-        {Name: "HRD"},
-        {Name: "Supplier"},
-    }
+	// Seed roles
+	roles := []entity.Role{
+		{Name: "Admin"},
+		{Name: "Team Support"},
+		{Name: "HRD"},
+		{Name: "Supplier"},
+	}
 
-    for _, role := range roles {
-        var r entity.Role
-        result := db.Where("name = ?", role.Name).First(&r)
-        if result.Error == gorm.ErrRecordNotFound {
-            if err := db.Create(&role).Error; err != nil {
-                log.Printf("Gagal membuat role %s: %v", role.Name, err)
-            } else {
-                log.Printf("Berhasil menambahkan role %s", role.Name)
-            }
-        }
-    }
+	for _, role := range roles {
+		var r entity.Role
+		result := db.Where("name = ?", role.Name).First(&r)
+		if result.Error == gorm.ErrRecordNotFound {
+			if err := db.Create(&role).Error; err != nil {
+				log.Printf("Gagal membuat role %s: %v", role.Name, err)
+			} else {
+				log.Printf("Berhasil menambahkan role %s", role.Name)
+			}
+		}
+	}
 
-    // Fetch roles to associate with users
-    // var adminRole, teamSupportRole entity.Role
-    // db.Where("name = ?", "Admin").First(&adminRole)
-    // db.Where("name = ?", "Team Support").First(&teamSupportRole)
+	if err := db.Find(&roles).Error; err != nil {
+		log.Printf("Gagal mengambil roles: %v", err)
+		return
+	}
 
-    // // Seed users
-    // users := []entity.User{
-    //     {Name: "Admin", Email: "admin@example.com", Password: "hashed_password", RoleID: adminRole.ID},
-    //     {Name: "User", Email: "user@example.com", Password: "hashed_password", RoleID: teamSupportRole.ID},
-    // }
+	user := entity.User{
+		Username: "admin_user",
+		Password: "securepassword", // Replace with hashed password in production
+		Name:     "Admin User",
+		Email:    "admin@example.com",
+		Telp:     "123456789",
+		Status:   "active",
+		Role:     roles,
+	}
 
-    // for _, user := range users {
-    //     var u entity.User
-    //     result := db.Where("email = ?", user.Email).First(&u)
-    //     if result.Error == gorm.ErrRecordNotFound {
-    //         if err := db.Create(&user).Error; err != nil {
-    //             log.Printf("Gagal membuat user %s: %v", user.Email, err)
-    //         } else {
-    //             log.Printf("Berhasil menambahkan user %s", user.Email)
-    //         }
-    //     }
-    // }
+	var existingUser entity.User
+	result := db.Where("username = ?", user.Username).First(&existingUser)
+	if result.Error == gorm.ErrRecordNotFound {
+		if err := db.Create(&user).Error; err != nil {
+			log.Printf("Gagal membuat user %s: %v", user.Username, err)
+		} else {
+			log.Printf("Berhasil menambahkan user %s dengan semua role", user.Username)
+		}
+	}
 }
