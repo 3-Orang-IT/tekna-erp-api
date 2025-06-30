@@ -12,7 +12,7 @@ type User struct {
 	PhotoProfileURL  string    `gorm:"size:255" json:"photo_profile_url"`
 	Status           string    `gorm:"size:50" json:"status"` // Atur sesuai kebutuhan: aktif/nonaktif/dll
 
-	Role             []Role    `gorm:"many2many:user_roles;" json:"roles"`
+	Role             []Role    `gorm:"many2many:user_roles;constraint:OnDelete:CASCADE;" json:"roles"`
 
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`

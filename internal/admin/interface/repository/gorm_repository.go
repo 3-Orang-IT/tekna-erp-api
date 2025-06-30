@@ -3,6 +3,7 @@ package adminRepository
 import (
 	repository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -15,12 +16,17 @@ func NewUserManagementRepository(db *gorm.DB) repository.UserManagementRepositor
 }
 
 func (r *userManagementRepo) CreateUser(user *entity.User) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.Password = string(hashedPassword)
 	return r.db.Create(user).Error
 }
 
 func (r *userManagementRepo) GetUsers() ([]entity.User, error) {
 	var users []entity.User
-	if err := r.db.Find(&users).Error; err != nil {
+	if err := r.db.Preload("Role").Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -28,14 +34,30 @@ func (r *userManagementRepo) GetUsers() ([]entity.User, error) {
 
 func (r *userManagementRepo) GetUserByID(id string) (*entity.User, error) {
 	var user entity.User
-	if err := r.db.First(&user, "id = ?", id).Error; err != nil {
+	if err := r.db.Preload("Role").First(&user, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
 func (r *userManagementRepo) UpdateUser(id string, user *entity.User) error {
-	return r.db.Model(&entity.User{}).Where("id = ?", id).Updates(user).Error
+	var existingUser entity.User
+	if err := r.db.First(&existingUser, "id = ?", id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return gorm.ErrRecordNotFound // Return specific error if user ID is not found
+		}
+		return err
+	}
+
+	if user.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		user.Password = string(hashedPassword)
+	}
+
+	return r.db.Model(&existingUser).Updates(user).Error
 }
 
 func (r *userManagementRepo) DeleteUser(id string) error {
@@ -43,5 +65,6 @@ func (r *userManagementRepo) DeleteUser(id string) error {
 	if err := r.db.First(&user, "id = ?", id).Error; err != nil {
 		return err // Return error if user not found
 	}
+
 	return r.db.Delete(&user).Error // Proceed to delete if user exists
 }

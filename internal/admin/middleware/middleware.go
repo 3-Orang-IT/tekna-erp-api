@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 
+	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/middleware"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -10,6 +11,13 @@ import (
 
 func AdminRoleMiddleware(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Use JWTAuthMiddleware to validate token and set userID in context
+		authMiddleware := middleware.JWTAuthMiddleware(db)
+		authMiddleware(c)
+		if c.IsAborted() {
+			return
+		}
+
 		userID, exists := c.Get("userID")
 		if !exists {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID missing in context"})

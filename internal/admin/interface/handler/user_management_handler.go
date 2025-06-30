@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/middleware"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/usecase"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"github.com/gin-gonic/gin"
@@ -15,9 +16,10 @@ type UserManagementHandler struct {
 	usecase usecase.UserManagementUsecase
 }
 
-func NewUserManagementHandler(r *gin.Engine, uc usecase.UserManagementUsecase) {
+func NewUserManagementHandler(r *gin.Engine, uc usecase.UserManagementUsecase,  db *gorm.DB) {
 	h := &UserManagementHandler{uc}
 	admin := r.Group("/api/v1/admin")
+	admin.Use(middleware.AdminRoleMiddleware(db))
 	admin.POST("/users", h.CreateUser)
 	admin.GET("/users", h.GetUsers)
 	admin.GET("/users/:id", h.GetUserByID)
@@ -87,17 +89,16 @@ func (h *UserManagementHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	if err := validateUser(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	if err := h.usecase.UpdateUser(id, &user); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "user ID not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": user})
+	c.JSON(http.StatusOK, gin.H{"message": "user updated successfully", "data": user})
 }
 
 func (h *UserManagementHandler) DeleteUser(c *gin.Context) {
