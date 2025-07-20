@@ -1,4 +1,4 @@
-package repository
+package adminRepository
 
 import "github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 

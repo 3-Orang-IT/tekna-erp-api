@@ -1,7 +1,7 @@
-package adminRepository
+package adminRepositoryImpl
 
 import (
-	repository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
+	adminRepository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -11,7 +11,7 @@ type userManagementRepo struct {
 	db *gorm.DB
 }
 
-func NewUserManagementRepository(db *gorm.DB) repository.UserManagementRepository {
+func NewUserManagementRepository(db *gorm.DB) adminRepository.UserManagementRepository {
 	return &userManagementRepo{db: db}
 }
 

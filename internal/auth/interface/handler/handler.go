@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/middleware"
 	usecase "github.com/3-Orang-IT/tekna-erp-api/internal/auth/usecase"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/utils"
+	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -69,12 +69,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
         return
     }
 
-    roles := []gin.H{}
+    roles := []string{}
     for _, role := range user.Role {
-        roles = append(roles, gin.H{
-            "id":   role.ID,
-            "name": role.Name,
-        })
+        roles = append(roles, role.Name)
     }
 
     c.JSON(http.StatusOK, gin.H{

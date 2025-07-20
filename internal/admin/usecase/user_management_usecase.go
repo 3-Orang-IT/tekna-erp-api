@@ -1,4 +1,4 @@
-package usecase
+package adminUsecase
 
 import (
 	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
@@ -14,10 +14,10 @@ type UserManagementUsecase interface {
 }
 
 type userManagementUsecase struct {
-	repo repository.UserManagementRepository
+	repo adminRepository.UserManagementRepository
 }
 
-func NewUserManagementUsecase(r repository.UserManagementRepository) UserManagementUsecase {
+func NewUserManagementUsecase(r adminRepository.UserManagementRepository) UserManagementUsecase {
 	return &userManagementUsecase{repo: r}
 }
 
