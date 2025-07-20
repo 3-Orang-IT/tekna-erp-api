@@ -70,7 +70,15 @@ func (h *MenuManagementHandler) GetMenus(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": menus})
+	response := gin.H{
+		"data": menus,
+		"pagination": gin.H{
+			"page":  page,
+			"limit": limit,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *MenuManagementHandler) GetMenuByID(c *gin.Context) {

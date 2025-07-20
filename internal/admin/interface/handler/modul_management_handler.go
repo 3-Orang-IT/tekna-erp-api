@@ -47,13 +47,31 @@ func (h *ModulManagementHandler) CreateModul(c *gin.Context) {
 }
 
 func (h *ModulManagementHandler) GetModuls(c *gin.Context) {
-	moduls, err := h.usecase.GetModuls()
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page parameter"})
+		return
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if err != nil || limit < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit parameter"})
+		return
+	}
+
+	moduls, err := h.usecase.GetModuls(page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": moduls})
+	response := gin.H{
+		"data":  moduls,
+		"page":  page,
+		"limit": limit,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *ModulManagementHandler) GetModulByID(c *gin.Context) {
