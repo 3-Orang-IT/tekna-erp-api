@@ -1,6 +1,7 @@
 package adminHandler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -83,7 +84,28 @@ func (h *UserManagementHandler) GetUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": users})
+	var userResponses []dto.UserResponse
+	for _, user := range users {
+		var roleNames []string
+		for _, role := range user.Role {
+			roleNames = append(roleNames, role.Name)
+		}
+
+		userResponses = append(userResponses, dto.UserResponse{
+			ID:              user.ID,
+			Username:        user.Username,
+			Name:            user.Name,
+			Email:           user.Email,
+			Telp:            user.Telp,
+			PhotoProfileURL: user.PhotoProfileURL,
+			Status:          user.Status,
+			Roles:           roleNames,
+			CreatedAt:       user.CreatedAt,
+			UpdatedAt:       user.UpdatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": userResponses})
 }
 
 func (h *UserManagementHandler) GetUserByID(c *gin.Context) {
@@ -94,19 +116,56 @@ func (h *UserManagementHandler) GetUserByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": user})
+	// Convert roles to []string
+	var roleNames []string
+	for _, role := range user.Role {
+		roleNames = append(roleNames, role.Name)
+	}
+
+	// Map ke response DTO
+	userResponse := dto.UserResponse{
+		ID:              user.ID,
+		Username:        user.Username,
+		Name:            user.Name,
+		Email:           user.Email,
+		Telp:            user.Telp,
+		PhotoProfileURL: user.PhotoProfileURL,
+		Status:          user.Status,
+		Roles:           roleNames,
+		CreatedAt:       user.CreatedAt,
+		UpdatedAt:       user.UpdatedAt,
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": userResponse})
 }
 
 func (h *UserManagementHandler) UpdateUser(c *gin.Context) {
 	id := c.Param("id")
-	var user entity.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var input dto.UpdateUserInput
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	// Mapping input ke entity.User
+	var roles []entity.Role
+	for _, roleID := range input.RoleIDs {
+		roles = append(roles, entity.Role{ID: roleID})
+	}
+
+	user := entity.User{
+		Username:        input.Username,
+		Password:        input.Password,
+		Name:            input.Name,
+		Telp:            input.Telp,
+		PhotoProfileURL: input.PhotoProfileURL,
+		Status:          input.Status,
+		Role:            roles,
+	}
+
+	// Panggil usecase
 	if err := h.usecase.UpdateUser(id, &user); err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "user ID not found"})
 			return
 		}
