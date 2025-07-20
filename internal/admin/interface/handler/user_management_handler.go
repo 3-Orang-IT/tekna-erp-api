@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/interface/dto"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/middleware"
-	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/usecase"
+	adminUsecase "github.com/3-Orang-IT/tekna-erp-api/internal/admin/usecase"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -41,10 +42,25 @@ func validateUser(user *entity.User) error {
 }
 
 func (h *UserManagementHandler) CreateUser(c *gin.Context) {
-	var user entity.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var input dto.CreateUserInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	user := entity.User{
+		Username:        input.Username,
+		Password:        input.Password,
+		Name:            input.Name,
+		Email:           input.Email,
+		Telp:            input.Telp,
+		PhotoProfileURL: input.PhotoProfileURL,
+		Status:          input.Status,
+	}
+
+	for _, roleID := range input.RoleIDs {
+		user.Role = append(user.Role, entity.Role{ID: roleID})
 	}
 
 	if err := validateUser(&user); err != nil {
