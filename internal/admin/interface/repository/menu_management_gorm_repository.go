@@ -18,9 +18,10 @@ func (r *menuManagementRepo) CreateMenu(menu *entity.Menu) error {
 	return r.db.Create(menu).Error
 }
 
-func (r *menuManagementRepo) GetMenus() ([]entity.Menu, error) {
+func (r *menuManagementRepo) GetMenus(page, limit int) ([]entity.Menu, error) {
 	var menus []entity.Menu
-	if err := r.db.Find(&menus).Error; err != nil {
+	offset := (page - 1) * limit
+	if err := r.db.Limit(limit).Offset(offset).Find(&menus).Error; err != nil {
 		return nil, err
 	}
 	return menus, nil

@@ -18,9 +18,10 @@ func (r *modulManagementRepo) CreateModul(modul *entity.Modul) error {
 	return r.db.Create(modul).Error
 }
 
-func (r *modulManagementRepo) GetModuls() ([]entity.Modul, error) {
+func (r *modulManagementRepo) GetModuls(page, limit int) ([]entity.Modul, error) {
 	var moduls []entity.Modul
-	if err := r.db.Find(&moduls).Error; err != nil {
+	offset := (page - 1) * limit
+	if err := r.db.Limit(limit).Offset(offset).Find(&moduls).Error; err != nil {
 		return nil, err
 	}
 	return moduls, nil

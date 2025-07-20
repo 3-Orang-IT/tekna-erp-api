@@ -53,13 +53,33 @@ func (h *RoleManagementHandler) CreateRole(c *gin.Context) {
 }
 
 func (h *RoleManagementHandler) GetRoles(c *gin.Context) {
-	roles, err := h.usecase.GetRoles()
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page parameter"})
+		return
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if err != nil || limit < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit parameter"})
+		return
+	}
+
+	roles, err := h.usecase.GetRoles(page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": roles})
+	response := gin.H{
+		"data": roles,
+		"pagination": gin.H{
+			"page":  page,
+			"limit": limit,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *RoleManagementHandler) GetRoleByID(c *gin.Context) {

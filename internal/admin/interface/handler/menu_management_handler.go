@@ -52,13 +52,33 @@ func (h *MenuManagementHandler) CreateMenu(c *gin.Context) {
 }
 
 func (h *MenuManagementHandler) GetMenus(c *gin.Context) {
-	menus, err := h.usecase.GetMenus()
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page parameter"})
+		return
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if err != nil || limit < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit parameter"})
+		return
+	}
+
+	menus, err := h.usecase.GetMenus(page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": menus})
+	response := gin.H{
+		"data": menus,
+		"pagination": gin.H{
+			"page":  page,
+			"limit": limit,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *MenuManagementHandler) GetMenuByID(c *gin.Context) {

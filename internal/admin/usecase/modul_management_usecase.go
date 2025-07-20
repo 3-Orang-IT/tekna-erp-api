@@ -7,7 +7,7 @@ import (
 
 type ModulManagementUsecase interface {
 	CreateModul(modul *entity.Modul) error
-	GetModuls() ([]entity.Modul, error)
+	GetModuls(page, limit int) ([]entity.Modul, error) // Updated to include pagination
 	GetModulByID(id string) (*entity.Modul, error)
 	UpdateModul(id string, modul *entity.Modul) error
 	DeleteModul(id string) error
@@ -25,8 +25,8 @@ func (u *modulManagementUsecase) CreateModul(modul *entity.Modul) error {
 	return u.repo.CreateModul(modul)
 }
 
-func (u *modulManagementUsecase) GetModuls() ([]entity.Modul, error) {
-	return u.repo.GetModuls()
+func (u *modulManagementUsecase) GetModuls(page, limit int) ([]entity.Modul, error) {
+	return u.repo.GetModuls(page, limit) // Updated to pass pagination parameters
 }
 
 func (u *modulManagementUsecase) GetModulByID(id string) (*entity.Modul, error) {

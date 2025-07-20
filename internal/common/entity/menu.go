@@ -8,4 +8,5 @@ type Menu struct {
 	URL      string `gorm:"size:255;not null"`
 	Icon     string `gorm:"size:255"`
 	Order    int    `gorm:"not null"`
+	Children []Menu `gorm:"foreignKey:ParentID"`
 }

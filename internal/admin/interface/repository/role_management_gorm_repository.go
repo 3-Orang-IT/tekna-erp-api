@@ -18,9 +18,10 @@ func (r *roleManagementRepo) CreateRole(role *entity.Role) error {
 	return r.db.Create(role).Error
 }
 
-func (r *roleManagementRepo) GetRoles() ([]entity.Role, error) {
+func (r *roleManagementRepo) GetRoles(page, limit int) ([]entity.Role, error) {
 	var roles []entity.Role
-	if err := r.db.Preload("Menus").Find(&roles).Error; err != nil {
+	offset := (page - 1) * limit
+	if err := r.db.Preload("Menus").Limit(limit).Offset(offset).Find(&roles).Error; err != nil {
 		return nil, err
 	}
 	return roles, nil
