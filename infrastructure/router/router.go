@@ -3,8 +3,8 @@ package router
 import (
 	"time"
 
-	userManagementHandler "github.com/3-Orang-IT/tekna-erp-api/internal/admin/interface/handler"
-	adminRepository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/interface/repository"
+	adminHandler "github.com/3-Orang-IT/tekna-erp-api/internal/admin/interface/handler"
+	adminRepositoryImpl "github.com/3-Orang-IT/tekna-erp-api/internal/admin/interface/repository"
 	adminUsecase "github.com/3-Orang-IT/tekna-erp-api/internal/admin/usecase"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/interface/handler"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/interface/repository"
@@ -31,12 +31,12 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	authRepo := repository.NewAuthRepository(db)
 	authUsecase := usecase.NewAuthUsecase(authRepo)
 	
-	userManagementRepo := adminRepository.NewUserManagementRepository(db)
+	userManagementRepo := adminRepositoryImpl.NewUserManagementRepository(db)
 	userManagementUsecase := adminUsecase.NewUserManagementUsecase(userManagementRepo)
 	
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
-	userManagementHandler.NewUserManagementHandler(r, userManagementUsecase, db)
+	adminHandler.NewUserManagementHandler(r, userManagementUsecase, db)
 
 	return r
 }

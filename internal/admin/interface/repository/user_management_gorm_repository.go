@@ -1,4 +1,4 @@
-package adminRepository
+package adminRepositoryImpl
 
 import (
 	repository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"

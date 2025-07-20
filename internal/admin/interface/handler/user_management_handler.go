@@ -1,4 +1,4 @@
-package userManagementHandler
+package adminHandler
 
 import (
 	"fmt"
@@ -13,10 +13,10 @@ import (
 )
 
 type UserManagementHandler struct {
-	usecase usecase.UserManagementUsecase
+	usecase adminUsecase.UserManagementUsecase
 }
 
-func NewUserManagementHandler(r *gin.Engine, uc usecase.UserManagementUsecase,  db *gorm.DB) {
+func NewUserManagementHandler(r *gin.Engine, uc adminUsecase.UserManagementUsecase,  db *gorm.DB) {
 	h := &UserManagementHandler{uc}
 	admin := r.Group("/api/v1/admin")
 	admin.Use(middleware.AdminRoleMiddleware(db))
