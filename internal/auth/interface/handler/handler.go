@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"sort"
 
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/middleware"
 	usecase "github.com/3-Orang-IT/tekna-erp-api/internal/auth/usecase"
@@ -14,6 +15,17 @@ import (
 
 type AuthHandler struct {
     usecase usecase.AuthUsecase
+}
+
+type MenuNode struct {
+    ID       uint       `json:"ID"`
+    ParentID *uint      `json:"ParentID"`
+    ModulID  uint       `json:"ModulID"`
+    Name     string     `json:"Name"`
+    URL      string     `json:"URL,omitempty"`
+    Icon     string     `json:"Icon"`
+    Order    int        `json:"Order"`
+    Children []MenuNode `json:"Children,omitempty"`
 }
 
 func NewAuthHandler(r *gin.Engine, uc usecase.AuthUsecase, db *gorm.DB) {
@@ -88,6 +100,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func (h *AuthHandler) GetMenus(c *gin.Context) {
+    // Ambil user ID dari context token
     userIdInterface, exists := c.Get("userID")
     if !exists {
         c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in token"})
@@ -100,13 +113,59 @@ func (h *AuthHandler) GetMenus(c *gin.Context) {
         return
     }
 
+    // Ambil menu dari usecase
     menus, err := h.usecase.GetMenus(userID)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
 
-    c.JSON(http.StatusOK, menus)
+    // Build tree function
+    var buildMenuTree func([]entity.Menu, *uint) []MenuNode
+    buildMenuTree = func(menus []entity.Menu, parentID *uint) []MenuNode {
+        var nodes []MenuNode
+        var filteredMenus []entity.Menu
+
+        // Filter menu dengan ParentID sesuai
+        for _, menu := range menus {
+            if (menu.ParentID == nil && parentID == nil) ||
+                (menu.ParentID != nil && parentID != nil && *menu.ParentID == *parentID) {
+                filteredMenus = append(filteredMenus, menu)
+            }
+        }
+
+        // Urutkan berdasarkan Order
+        sort.SliceStable(filteredMenus, func(i, j int) bool {
+            return filteredMenus[i].Order < filteredMenus[j].Order
+        })
+
+        for _, menu := range filteredMenus {
+            children := buildMenuTree(menus, &menu.ID)
+
+            node := MenuNode{
+                ID:       menu.ID,
+                ParentID: menu.ParentID,
+                ModulID:  menu.ModulID,
+                Name:     menu.Name,
+                Icon:     menu.Icon,
+                Order:    menu.Order,
+                URL:      menu.URL,
+            }
+
+            // Jika punya children, kosongkan URL dan tambahkan children
+            if len(children) > 0 {
+                node.URL = ""
+                node.Children = children
+            }
+
+            nodes = append(nodes, node)
+        }
+
+        return nodes
+    }
+
+    menuTree := buildMenuTree(menus, nil)
+    c.JSON(http.StatusOK, gin.H{"data": menuTree})
 }
 
 
