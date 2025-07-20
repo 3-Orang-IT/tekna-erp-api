@@ -18,14 +18,14 @@ type AuthHandler struct {
 }
 
 type MenuNode struct {
-    ID       uint       `json:"ID"`
-    ParentID *uint      `json:"ParentID"`
-    ModulID  uint       `json:"ModulID"`
-    Name     string     `json:"Name"`
-    URL      string     `json:"URL,omitempty"`
-    Icon     string     `json:"Icon"`
-    Order    int        `json:"Order"`
-    Children []MenuNode `json:"Children,omitempty"`
+    ID       uint       `json:"id"`
+    ParentID *uint      `json:"parent_id"`
+    ModulID  uint       `json:"modul_id"`
+    Name     string     `json:"name"`
+    URL      string     `json:"path,omitempty"`
+    Icon     string     `json:"icon"`
+    Order    int        `json:"order"`
+    Children []MenuNode `json:"children,omitempty"`
 }
 
 func NewAuthHandler(r *gin.Engine, uc usecase.AuthUsecase, db *gorm.DB) {
