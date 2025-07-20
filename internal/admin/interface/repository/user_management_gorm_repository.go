@@ -24,9 +24,10 @@ func (r *userManagementRepo) CreateUser(user *entity.User) error {
 	return r.db.Create(user).Error
 }
 
-func (r *userManagementRepo) GetUsers() ([]entity.User, error) {
+func (r *userManagementRepo) GetUsers(page, limit int) ([]entity.User, error) {
 	var users []entity.User
-	if err := r.db.Preload("Role").Find(&users).Error; err != nil {
+	offset := (page - 1) * limit
+	if err := r.db.Preload("Role").Limit(limit).Offset(offset).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil

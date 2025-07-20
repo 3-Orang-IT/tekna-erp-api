@@ -7,7 +7,7 @@ import (
 
 type RoleManagementUsecase interface {
 	CreateRole(role *entity.Role) error
-	GetRoles() ([]entity.Role, error)
+	GetRoles(page, limit int) ([]entity.Role, error)
 	GetRoleByID(id string) (*entity.Role, error)
 	UpdateRole(id string, role *entity.Role) error
 	DeleteRole(id string) error
@@ -25,8 +25,8 @@ func (u *roleManagementUsecase) CreateRole(role *entity.Role) error {
 	return u.repo.CreateRole(role)
 }
 
-func (u *roleManagementUsecase) GetRoles() ([]entity.Role, error) {
-	return u.repo.GetRoles()
+func (u *roleManagementUsecase) GetRoles(page, limit int) ([]entity.Role, error) {
+	return u.repo.GetRoles(page, limit)
 }
 
 func (u *roleManagementUsecase) GetRoleByID(id string) (*entity.Role, error) {

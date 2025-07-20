@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/interface/dto"
@@ -18,7 +19,7 @@ type UserManagementHandler struct {
 	usecase adminUsecase.UserManagementUsecase
 }
 
-func NewUserManagementHandler(r *gin.Engine, uc adminUsecase.UserManagementUsecase,  db *gorm.DB) {
+func NewUserManagementHandler(r *gin.Engine, uc adminUsecase.UserManagementUsecase, db *gorm.DB) {
 	h := &UserManagementHandler{uc}
 	admin := r.Group("/api/v1/admin")
 	admin.Use(middleware.AdminRoleMiddleware(db))
@@ -78,7 +79,19 @@ func (h *UserManagementHandler) CreateUser(c *gin.Context) {
 }
 
 func (h *UserManagementHandler) GetUsers(c *gin.Context) {
-	users, err := h.usecase.GetUsers()
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page parameter"})
+		return
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if err != nil || limit < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit parameter"})
+		return
+	}
+
+	users, err := h.usecase.GetUsers(page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -105,7 +118,15 @@ func (h *UserManagementHandler) GetUsers(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": userResponses})
+	response := gin.H{
+		"data": userResponses,
+		"pagination": gin.H{
+			"page":  page,
+			"limit": limit,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *UserManagementHandler) GetUserByID(c *gin.Context) {
