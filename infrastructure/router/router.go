@@ -37,10 +37,18 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	roleManagementRepo := adminRepositoryImpl.NewRoleManagementRepository(db)
 	roleManagementUsecase := adminUsecase.NewRoleManagementUsecase(roleManagementRepo)
 	
+	menuManagementRepo := adminRepositoryImpl.NewMenuManagementRepository(db)
+	menuManagementUsecase := adminUsecase.NewMenuManagementUsecase(menuManagementRepo)
+	
+	modulManagementRepo := adminRepositoryImpl.NewModulManagementRepository(db)
+	modulManagementUsecase := adminUsecase.NewModulManagementUsecase(modulManagementRepo)
+	
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
 	adminHandler.NewUserManagementHandler(r, userManagementUsecase, db)
 	adminHandler.NewRoleManagementHandler(r, roleManagementUsecase, db)
+	adminHandler.NewMenuManagementHandler(r, menuManagementUsecase, db)
+	adminHandler.NewModulManagementHandler(r, modulManagementUsecase, db)
 
 	return r
 }
