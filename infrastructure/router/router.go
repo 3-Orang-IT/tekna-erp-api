@@ -37,8 +37,17 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	authRepo := repository.NewAuthRepository(db)
 	authUsecase := usecase.NewAuthUsecase(authRepo)
 	
-	userManagementRepo := adminRepository.NewUserManagementRepository(db)
+	userManagementRepo := adminRepositoryImpl.NewUserManagementRepository(db)
 	userManagementUsecase := adminUsecase.NewUserManagementUsecase(userManagementRepo)
+
+	roleManagementRepo := adminRepositoryImpl.NewRoleManagementRepository(db)
+	roleManagementUsecase := adminUsecase.NewRoleManagementUsecase(roleManagementRepo)
+	
+	menuManagementRepo := adminRepositoryImpl.NewMenuManagementRepository(db)
+	menuManagementUsecase := adminUsecase.NewMenuManagementUsecase(menuManagementRepo)
+	
+	modulManagementRepo := adminRepositoryImpl.NewModulManagementRepository(db)
+	modulManagementUsecase := adminUsecase.NewModulManagementUsecase(modulManagementRepo)
 
 	// company repository dan usecase
 	companyRepo := companyRepository.NewCompanyRepository(db)
@@ -46,7 +55,10 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
-	userManagementHandler.NewUserManagementHandler(r, userManagementUsecase, db)
+	adminHandler.NewUserManagementHandler(r, userManagementUsecase, db)
+	adminHandler.NewRoleManagementHandler(r, roleManagementUsecase, db)
+	adminHandler.NewMenuManagementHandler(r, menuManagementUsecase, db)
+	adminHandler.NewModulManagementHandler(r, modulManagementUsecase, db)
 	companyHandler.NewCompanyHandler(r, companyUsecase, db)
 
 	return r

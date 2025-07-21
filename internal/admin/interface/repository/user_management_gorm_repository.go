@@ -1,7 +1,7 @@
-package adminRepository
+package adminRepositoryImpl
 
 import (
-	repository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
+	adminRepository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -11,7 +11,7 @@ type userManagementRepo struct {
 	db *gorm.DB
 }
 
-func NewUserManagementRepository(db *gorm.DB) repository.UserManagementRepository {
+func NewUserManagementRepository(db *gorm.DB) adminRepository.UserManagementRepository {
 	return &userManagementRepo{db: db}
 }
 
@@ -24,9 +24,10 @@ func (r *userManagementRepo) CreateUser(user *entity.User) error {
 	return r.db.Create(user).Error
 }
 
-func (r *userManagementRepo) GetUsers() ([]entity.User, error) {
+func (r *userManagementRepo) GetUsers(page, limit int) ([]entity.User, error) {
 	var users []entity.User
-	if err := r.db.Preload("Role").Find(&users).Error; err != nil {
+	offset := (page - 1) * limit
+	if err := r.db.Preload("Role").Limit(limit).Offset(offset).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil

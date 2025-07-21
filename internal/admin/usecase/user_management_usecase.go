@@ -1,23 +1,23 @@
-package usecase
+package adminUsecase
 
 import (
-	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
+	adminRepository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 )
 
 type UserManagementUsecase interface {
 	CreateUser(user *entity.User) error
-	GetUsers() ([]entity.User, error)
+	GetUsers(page, limit int) ([]entity.User, error)
 	GetUserByID(id string) (*entity.User, error)
 	UpdateUser(id string, user *entity.User) error
 	DeleteUser(id string) error
 }
 
 type userManagementUsecase struct {
-	repo repository.UserManagementRepository
+	repo adminRepository.UserManagementRepository
 }
 
-func NewUserManagementUsecase(r repository.UserManagementRepository) UserManagementUsecase {
+func NewUserManagementUsecase(r adminRepository.UserManagementRepository) UserManagementUsecase {
 	return &userManagementUsecase{repo: r}
 }
 
@@ -25,8 +25,8 @@ func (u *userManagementUsecase) CreateUser(user *entity.User) error {
 	return u.repo.CreateUser(user)
 }
 
-func (u *userManagementUsecase) GetUsers() ([]entity.User, error) {
-	return u.repo.GetUsers()
+func (u *userManagementUsecase) GetUsers(page, limit int) ([]entity.User, error) {
+	return u.repo.GetUsers(page, limit)
 }
 
 func (u *userManagementUsecase) GetUserByID(id string) (*entity.User, error) {
