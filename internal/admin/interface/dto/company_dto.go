@@ -29,3 +29,20 @@ type UpdateCompanyInput struct {
 	TotalShares      int     `json:"total_shares"`
 	AnnualLeaveQuota int     `json:"annual_leave_quota"`
 }
+
+type CompanyResponse struct {
+	Name             string  `json:"name"`
+	Address          string  `json:"address"`
+	City             string  `json:"city"`
+	Province         string  `json:"province"`
+	Telp             string  `json:"telp"`
+	Fax              string  `json:"fax"`
+	Email            string  `json:"email"`
+	StartHour        string  `json:"start_hour"`
+	EndHour          string  `json:"end_hour"`
+	Latitude         float64 `json:"lat"`
+	Longitude        float64 `json:"long"`
+	TotalShares      int     `json:"total_shares"`
+	AnnualLeaveQuota int     `json:"annual_leave_quota"`
+	UpdatedAt        string  `json:"updated_at"`
+}

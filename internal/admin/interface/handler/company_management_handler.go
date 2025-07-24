@@ -76,8 +76,29 @@ func (h *CompanyManagementHandler) GetCompanies(c *gin.Context) {
 		return
 	}
 
+	// Map companies to the desired response format using CompanyResponse DTO
+	var responseData []dto.CompanyResponse
+	for _, company := range companies {
+		responseData = append(responseData, dto.CompanyResponse{
+			Name:             company.Name,
+			Address:          company.Address,
+			City:             company.City.Name,
+			Province:         company.City.Province.Name,
+			Telp:             company.Phone,
+			Fax:              company.Fax,
+			Email:            company.Email,
+			StartHour:        company.StartHour,
+			EndHour:          company.EndHour,
+			Latitude:         company.Latitude,
+			Longitude:        company.Longitude,
+			TotalShares:      company.TotalShares,
+			AnnualLeaveQuota: company.AnnualLeaveQuota,
+			UpdatedAt:        "", // Placeholder for UpdatedAt
+		})
+	}
+
 	response := gin.H{
-		"data": companies,
+		"data": responseData,
 		"pagination": gin.H{
 			"page":  page,
 			"limit": limit,
