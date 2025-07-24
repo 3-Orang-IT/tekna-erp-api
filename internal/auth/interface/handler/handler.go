@@ -19,8 +19,6 @@ type AuthHandler struct {
 
 type MenuNode struct {
     ID       uint       `json:"id"`
-    ParentID *uint      `json:"parent_id"`
-    ModulID  uint       `json:"modul_id"`
     Name     string     `json:"name"`
     URL      string     `json:"path,omitempty"`
     Icon     string     `json:"icon"`
@@ -144,8 +142,6 @@ func (h *AuthHandler) GetMenus(c *gin.Context) {
 
             node := MenuNode{
                 ID:       menu.ID,
-                ParentID: menu.ParentID,
-                ModulID:  menu.ModulID,
                 Name:     menu.Name,
                 Icon:     menu.Icon,
                 Order:    menu.Order,
