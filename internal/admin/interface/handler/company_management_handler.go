@@ -78,24 +78,24 @@ func (h *CompanyManagementHandler) GetCompanies(c *gin.Context) {
 
 	// Map companies to the desired response format using CompanyResponse DTO
 	var responseData []dto.CompanyResponse
-	for _, company := range companies {
-		responseData = append(responseData, dto.CompanyResponse{
-			Name:             company.Name,
-			Address:          company.Address,
-			City:             company.City.Name,
-			Province:         company.City.Province.Name,
-			Telp:             company.Phone,
-			Fax:              company.Fax,
-			Email:            company.Email,
-			StartHour:        company.StartHour,
-			EndHour:          company.EndHour,
-			Latitude:         company.Latitude,
-			Longitude:        company.Longitude,
-			TotalShares:      company.TotalShares,
-			AnnualLeaveQuota: company.AnnualLeaveQuota,
-			UpdatedAt:        "", // Placeholder for UpdatedAt
-		})
-	}
+   for _, company := range companies {
+	   responseData = append(responseData, dto.CompanyResponse{
+		   Name:             company.Name,
+		   Address:          company.Address,
+		   City:             company.City.Name,
+		   Province:         company.City.Province.Name,
+		   Telp:             company.Phone,
+		   Fax:              company.Fax,
+		   Email:            company.Email,
+		   StartHour:        company.StartHour,
+		   EndHour:          company.EndHour,
+		   Latitude:         company.Latitude,
+		   Longitude:        company.Longitude,
+		   TotalShares:      company.TotalShares,
+		   AnnualLeaveQuota: company.AnnualLeaveQuota,
+		   UpdatedAt:        company.UpdatedAt.Format("02-01-2006 15:04"),
+	   })
+   }
 
 	response := gin.H{
 		"data": responseData,
@@ -109,14 +109,32 @@ func (h *CompanyManagementHandler) GetCompanies(c *gin.Context) {
 }
 
 func (h *CompanyManagementHandler) GetCompanyByID(c *gin.Context) {
-	id := c.Param("id")
-	company, err := h.usecase.GetCompanyByID(id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+id := c.Param("id")
+company, err := h.usecase.GetCompanyByID(id)
+if err != nil {
+	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	return
+}
 
-	c.JSON(http.StatusOK, gin.H{"data": company})
+// Map to CompanyResponse DTO for clean response
+response := dto.CompanyResponse{
+	Name:             company.Name,
+	Address:          company.Address,
+	City:             company.City.Name,
+	Province:         company.City.Province.Name,
+	Telp:             company.Phone,
+	Fax:              company.Fax,
+	Email:            company.Email,
+	StartHour:        company.StartHour,
+	EndHour:          company.EndHour,
+	Latitude:         company.Latitude,
+	Longitude:        company.Longitude,
+	TotalShares:      company.TotalShares,
+	AnnualLeaveQuota: company.AnnualLeaveQuota,
+	UpdatedAt:        company.UpdatedAt.Format("02-01-2006 15:04"),
+}
+
+c.JSON(http.StatusOK, gin.H{"data": response})
 }
 
 func (h *CompanyManagementHandler) UpdateCompany(c *gin.Context) {

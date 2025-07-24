@@ -28,11 +28,11 @@ func (r *companyManagementRepo) GetCompanies(page, limit int) ([]entity.Company,
 }
 
 func (r *companyManagementRepo) GetCompanyByID(id string) (*entity.Company, error) {
-	var company entity.Company
-	if err := r.db.First(&company, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &company, nil
+var company entity.Company
+if err := r.db.Preload("City.Province").Preload("City").First(&company, "id = ?", id).Error; err != nil {
+	return nil, err
+}
+return &company, nil
 }
 
 func (r *companyManagementRepo) UpdateCompany(id string, company *entity.Company) error {
