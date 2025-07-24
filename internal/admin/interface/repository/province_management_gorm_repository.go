@@ -1,0 +1,55 @@
+package adminRepositoryImpl
+
+import (
+	adminRepository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
+	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
+	"gorm.io/gorm"
+)
+
+type provinceManagementRepo struct {
+	db *gorm.DB
+}
+
+func NewProvinceManagementRepository(db *gorm.DB) adminRepository.ProvinceManagementRepository {
+	return &provinceManagementRepo{db: db}
+}
+
+func (r *provinceManagementRepo) CreateProvince(province *entity.Province) error {
+	return r.db.Create(province).Error
+}
+
+func (r *provinceManagementRepo) GetProvinces(page, limit int) ([]entity.Province, error) {
+	var provinces []entity.Province
+	offset := (page - 1) * limit
+	if err := r.db.Limit(limit).Offset(offset).Find(&provinces).Error; err != nil {
+		return nil, err
+	}
+	return provinces, nil
+}
+
+func (r *provinceManagementRepo) GetProvinceByID(id string) (*entity.Province, error) {
+	var province entity.Province
+	if err := r.db.First(&province, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &province, nil
+}
+
+func (r *provinceManagementRepo) UpdateProvince(id string, province *entity.Province) error {
+	var existingProvince entity.Province
+	if err := r.db.First(&existingProvince, "id = ?", id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return gorm.ErrRecordNotFound
+		}
+		return err
+	}
+	return r.db.Model(&existingProvince).Updates(province).Error
+}
+
+func (r *provinceManagementRepo) DeleteProvince(id string) error {
+	var province entity.Province
+	if err := r.db.First(&province, "id = ?", id).Error; err != nil {
+		return err
+	}
+	return r.db.Delete(&province).Error
+}
