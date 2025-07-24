@@ -1,43 +1,61 @@
 package seeders
 
 import (
-    "log"
-    "time"
+	"log"
 
-    "github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
-    "gorm.io/gorm"
+	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
+	"gorm.io/gorm"
 )
 
 func SeedCompanies(db *gorm.DB) error {
-    company := entity.Company{
-        ID:               "9bd50663-34f1-412d-9e28-a6ae23be5576",
-        Name:             "PT. Mitra Karya Analitika",
-        Address:          "Jl. Klipang Raya, Ruko Amsterdam No.90, Semarang",
-        CityID:           "3374",
-        ProvinceID:       "33",
-        Phone:            "024-76412142",
-        Fax:              "",
-        Email:            "support@mikacares.com",
-        StartHour:        "08:00:00",
-        EndHour:          "17:00:00",
-        Latitude:         -7.049414065937655,
-        Longitude:        110.48074422452338,
-        TotalShares:      500,
-        AnnualLeaveQuota: 12,
-        CreatedAt:        time.Date(2020, 9, 25, 9, 59, 52, 0, time.UTC),
-        UpdatedAt:        time.Date(2021, 5, 23, 13, 16, 24, 0, time.UTC),
-    }
+	// First get a city ID for reference
+	var jakartaCity entity.City
+	
+	if err := db.Where("name = ?", "Jakarta Pusat").First(&jakartaCity).Error; err != nil {
+		log.Printf("Error finding Jakarta Pusat city: %v", err)
+		return err
+	}
 
-    var existingCompany entity.Company
-    if err := db.Where("id = ?", company.ID).First(&existingCompany).Error; err == gorm.ErrRecordNotFound {
-        if err := db.Create(&company).Error; err != nil {
-            log.Printf("Failed to create company %s: %v", company.Name, err)
-            return err
-        }
-        log.Printf("Successfully added company %s", company.Name)
-    } else {
-        log.Printf("Company %s already exists", company.Name)
-    }
+	companiesList := []entity.Company{
+		{
+			Name:             "PT Tekna Indonesia",
+			Address:          "Jl. Sudirman No. 123",
+			CityID:           jakartaCity.ID,
+			Phone:            "021-5551234",
+			Fax:              "021-5551235",
+			Email:            "contact@tekna.id",
+			StartHour:        "08:00",
+			EndHour:          "17:00",
+			Latitude:         -6.2088,
+			Longitude:        106.8456,
+			TotalShares:      10000,
+			AnnualLeaveQuota: 12,
+		},
+		{
+			Name:             "PT Tekna Solutions",
+			Address:          "Jl. Gatot Subroto No. 456",
+			CityID:           jakartaCity.ID,
+			Phone:            "021-5557890",
+			Fax:              "021-5557891",
+			Email:            "info@tekna-solutions.id",
+			StartHour:        "09:00",
+			EndHour:          "18:00",
+			Latitude:         -6.2256,
+			Longitude:        106.8025,
+			TotalShares:      5000,
+			AnnualLeaveQuota: 14,
+		},
+	}
 
-    return nil
+	for _, company := range companiesList {
+		var c entity.Company
+		if err := db.Where("name = ?", company.Name).First(&c).Error; err == gorm.ErrRecordNotFound {
+			if err := db.Create(&company).Error; err != nil {
+				log.Printf("Failed to create company %s: %v", company.Name, err)
+				return err
+			}
+			log.Printf("Successfully added company %s", company.Name)
+		}
+	}
+	return nil
 }
