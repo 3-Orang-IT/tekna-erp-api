@@ -8,6 +8,21 @@ import (
 
 func Seed(db *gorm.DB) {
 	db.Transaction(func(tx *gorm.DB) error {
+		if err := SeedProvinces(tx); err != nil {
+			log.Printf("Error seeding provinces: %v", err)
+			return err
+		}
+		
+		if err := SeedCities(tx); err != nil {
+			log.Printf("Error seeding cities: %v", err)
+			return err
+		}
+		
+		if err := SeedCompanies(tx); err != nil {
+			log.Printf("Error seeding companies: %v", err)
+			return err
+		}
+		
 		if err := SeedModuls(tx); err != nil {
 			log.Printf("Error seeding moduls: %v", err)
 			return err
