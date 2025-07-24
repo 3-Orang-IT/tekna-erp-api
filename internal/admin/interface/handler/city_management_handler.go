@@ -36,7 +36,7 @@ func (h *CityManagementHandler) CreateCity(c *gin.Context) {
 
 	city := entity.City{
 		Name:       input.Name,
-		ProvinceID: input.ProvinceID,
+		ProvinceID: &input.ProvinceID,
 	}
 
 	if err := h.usecase.CreateCity(&city); err != nil {
@@ -114,7 +114,7 @@ func (h *CityManagementHandler) UpdateCity(c *gin.Context) {
 	city := entity.City{
 		ID:         uint(idUint),
 		Name:       input.Name,
-		ProvinceID: input.ProvinceID,
+		ProvinceID: &input.ProvinceID,
 	}
 
 	if err := h.usecase.UpdateCity(id, &city); err != nil {
