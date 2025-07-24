@@ -4,7 +4,6 @@ type CreateCompanyInput struct {
 	Name             string  `json:"name" binding:"required"`
 	Address          string  `json:"address" binding:"required"`
 	CityID           uint    `json:"city_id" binding:"required"`
-	ProvinceID       uint    `json:"province_id" binding:"required"`
 	Phone            string  `json:"phone"`
 	Fax              string  `json:"fax"`
 	Email            string  `json:"email" binding:"required"`
@@ -20,7 +19,6 @@ type UpdateCompanyInput struct {
 	Name             string  `json:"name"`
 	Address          string  `json:"address"`
 	CityID           uint    `json:"city_id"`
-	ProvinceID       uint    `json:"province_id"`
 	Phone            string  `json:"phone"`
 	Fax              string  `json:"fax"`
 	Email            string  `json:"email"`

@@ -21,7 +21,7 @@ func (r *companyManagementRepo) CreateCompany(company *entity.Company) error {
 func (r *companyManagementRepo) GetCompanies(page, limit int) ([]entity.Company, error) {
 	var companies []entity.Company
 	offset := (page - 1) * limit
-	if err := r.db.Limit(limit).Offset(offset).Find(&companies).Error; err != nil {
+	if err := r.db.Preload("City.Province").Preload("City").Limit(limit).Offset(offset).Find(&companies).Error; err != nil {
 		return nil, err
 	}
 	return companies, nil
