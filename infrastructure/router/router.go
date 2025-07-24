@@ -52,6 +52,9 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	provinceManagementRepo := adminRepositoryImpl.NewProvinceManagementRepository(db)
 	provinceManagementUsecase := adminUsecase.NewProvinceManagementUsecase(provinceManagementRepo)
 
+	cityManagementRepo := adminRepositoryImpl.NewCityManagementRepository(db)
+	cityManagementUsecase := adminUsecase.NewCityManagementUsecase(cityManagementRepo)
+
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
 	adminHandler.NewUserManagementHandler(r, userManagementUsecase, db)
@@ -61,6 +64,7 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewDivisionManagementHandler(r, devisionManagementUsecase, db)
 	adminHandler.NewCompanyManagementHandler(r, companyManagementUsecase, db)
 	adminHandler.NewProvinceManagementHandler(r, provinceManagementUsecase, db)
+	adminHandler.NewCityManagementHandler(r, cityManagementUsecase, db)
 
 	return r
 }
