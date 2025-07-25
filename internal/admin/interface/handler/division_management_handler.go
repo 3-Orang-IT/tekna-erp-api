@@ -23,6 +23,7 @@ func NewDivisionManagementHandler(r *gin.Engine, uc adminUsecase.DivisionManagem
 	admin.POST("/divisions", h.CreateDivision)
 	admin.GET("/divisions", h.GetDivisions)
 	admin.GET("/divisions/:id", h.GetDivisionByID)
+	admin.GET("/divisions/:id/edit", h.GetDivisionEditPage)
 	admin.PUT("/divisions/:id", h.UpdateDivision)
 	admin.DELETE("/divisions/:id", h.DeleteDivision)
 }
@@ -59,7 +60,8 @@ func (h *DivisionManagementHandler) GetDivisions(c *gin.Context) {
 		return
 	}
 
-	divisions, err := h.usecase.GetDivisions(page, limit)
+	search := c.DefaultQuery("search", "")
+	divisions, err := h.usecase.GetDivisions(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -80,6 +82,17 @@ func (h *DivisionManagementHandler) GetDivisionByID(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{"data": division})
+}
+
+// GetDivisionEditPage returns division data for the edit page
+func (h *DivisionManagementHandler) GetDivisionEditPage(c *gin.Context) {
+	id := c.Param("id")
+	division, err := h.usecase.GetDivisionByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": division})
 }
 

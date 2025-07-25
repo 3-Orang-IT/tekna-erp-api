@@ -38,7 +38,10 @@ func Seed(db *gorm.DB) {
 			return err
 		}
 
-
+		if err := SeedDivisions(tx); err != nil {
+			log.Printf("Error seeding divisions: %v", err)
+			return err
+		}
 
 		if err := SeedUsers(tx); err != nil {
 			log.Printf("Error seeding users: %v", err)
