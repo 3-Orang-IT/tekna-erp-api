@@ -2,13 +2,19 @@ package router
 
 import (
 	"time"
-
+	// user management
 	adminHandler "github.com/3-Orang-IT/tekna-erp-api/internal/admin/interface/handler"
 	adminRepositoryImpl "github.com/3-Orang-IT/tekna-erp-api/internal/admin/interface/repository"
 	adminUsecase "github.com/3-Orang-IT/tekna-erp-api/internal/admin/usecase"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/interface/handler"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/interface/repository"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/auth/usecase"
+
+	// company
+	companyRepository "github.com/3-Orang-IT/tekna-erp-api/internal/company/interface/repository"
+	companyHandler "github.com/3-Orang-IT/tekna-erp-api/internal/company/interface/handler"
+	companyUsecase "github.com/3-Orang-IT/tekna-erp-api/internal/company/usecase"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -42,6 +48,9 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	
 	modulManagementRepo := adminRepositoryImpl.NewModulManagementRepository(db)
 	modulManagementUsecase := adminUsecase.NewModulManagementUsecase(modulManagementRepo)
+	
+	companyRepo := companyRepository.NewCompanyRepository(db)
+	companyUsecase := companyUsecase.NewCompanyUsecase(companyRepo)
 	
 	devisionManagementRepo := adminRepositoryImpl.NewDivisionManagementRepository(db)
 	devisionManagementUsecase := adminUsecase.NewDivisionManagementUsecase(devisionManagementRepo)
