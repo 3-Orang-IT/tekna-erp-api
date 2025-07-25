@@ -164,8 +164,10 @@ func (h *CityManagementHandler) GetEditCityPage(c *gin.Context) {
 	}
 
 	response := gin.H{
-		"city":      city,
-		"provinces": provinceList,
+		"data": city,
+		"refrences": gin.H{
+			"provinces": provinceList,
+		},
 	}
 
 	c.JSON(http.StatusOK, response)
