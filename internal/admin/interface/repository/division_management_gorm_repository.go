@@ -1,6 +1,8 @@
 package adminRepositoryImpl
 
 import (
+	"strings"
+
 	adminRepository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"gorm.io/gorm"
@@ -18,10 +20,14 @@ func (r *divisionManagementRepo) CreateDivision(division *entity.Division) error
 	return r.db.Create(division).Error
 }
 
-func (r *divisionManagementRepo) GetDivisions(page, limit int) ([]entity.Division, error) {
+func (r *divisionManagementRepo) GetDivisions(page, limit int, search string) ([]entity.Division, error) {
 	var divisions []entity.Division
 	offset := (page - 1) * limit
-	if err := r.db.Limit(limit).Offset(offset).Find(&divisions).Error; err != nil {
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Limit(limit).Offset(offset).Find(&divisions).Error; err != nil {
 		return nil, err
 	}
 	return divisions, nil

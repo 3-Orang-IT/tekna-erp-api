@@ -3,21 +3,20 @@ package entity
 import "time"
 
 type Company struct {
-	ID               string    `gorm:"primaryKey;size:36"`
-	Name             string    `gorm:"size:255;not null"`
-	Address          string    `gorm:"size:500;not null"`
-	CityID           string    `gorm:"size:50;not null"`
-	ProvinceID       string    `gorm:"size:50;not null"`
-	Phone            string    `gorm:"size:50"`
-	Fax              string    `gorm:"size:50"`
-	Email            string    `gorm:"size:100;not null"`
-	StartHour        string    `gorm:"size:10;not null"`
-	EndHour          string    `gorm:"size:10;not null"`
-	Latitude         float64   `gorm:"not null"`
-	Longitude        float64   `gorm:"not null"`
-	TotalShares      int       `gorm:"not null"`
-	AnnualLeaveQuota int       `gorm:"not null"`
-	CreatedAt        time.Time `gorm:"autoCreateTime"`
-	UpdatedAt        time.Time `gorm:"autoUpdateTime"`
-	DeletedAt        *time.Time `gorm:"index"`
+	ID               uint      `gorm:"primaryKey" json:"id"`
+	Name             string    `gorm:"size:255;not null" json:"name"`
+	Address          string    `gorm:"size:255;not null" json:"address"`
+	CityID           uint      `gorm:"not null" json:"city_id"`
+	Phone            string    `gorm:"size:50" json:"phone"`
+	Fax              string    `gorm:"size:50" json:"fax"`
+	Email            string    `gorm:"size:100;not null" json:"email"`
+	StartHour        string    `gorm:"size:10;not null" json:"start_hour"`
+	EndHour          string    `gorm:"size:10;not null" json:"end_hour"`
+	Latitude         float64   `gorm:"not null" json:"latitude"`
+	Longitude        float64   `gorm:"not null" json:"longitude"`
+	TotalShares      int       `gorm:"not null" json:"total_shares"`
+	AnnualLeaveQuota int       `gorm:"not null" json:"annual_leave_quota"`
+	City             City      `gorm:"foreignKey:CityID" json:"city"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
