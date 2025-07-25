@@ -1,6 +1,8 @@
 package adminRepositoryImpl
 
 import (
+	"strings"
+
 	adminRepository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"gorm.io/gorm"
@@ -18,13 +20,17 @@ func (r *jobPositionManagementRepo) CreateJobPosition(jobPosition *entity.JobPos
 	return r.db.Create(jobPosition).Error
 }
 
-func (r *jobPositionManagementRepo) GetJobPositions(page, limit int) ([]entity.JobPosition, error) {
-	var jobPositions []entity.JobPosition
-	offset := (page - 1) * limit
-	if err := r.db.Limit(limit).Offset(offset).Find(&jobPositions).Error; err != nil {
-		return nil, err
-	}
-	return jobPositions, nil
+func (r *jobPositionManagementRepo) GetJobPositions(page, limit int, search string) ([]entity.JobPosition, error) {
+	   var jobPositions []entity.JobPosition
+	   offset := (page - 1) * limit
+	   query := r.db
+	   if search != "" {
+			   query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	   }
+	   if err := query.Limit(limit).Offset(offset).Find(&jobPositions).Error; err != nil {
+			   return nil, err
+	   }
+	   return jobPositions, nil
 }
 
 func (r *jobPositionManagementRepo) GetJobPositionByID(id string) (*entity.JobPosition, error) {

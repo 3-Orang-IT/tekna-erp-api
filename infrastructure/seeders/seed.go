@@ -18,10 +18,15 @@ func Seed(db *gorm.DB) {
 			return err
 		}
 		
-		if err := SeedCompanies(tx); err != nil {
-			log.Printf("Error seeding companies: %v", err)
-			return err
-		}
+	   if err := SeedCompanies(tx); err != nil {
+			   log.Printf("Error seeding companies: %v", err)
+			   return err
+	   }
+
+	   if err := SeedJobPositions(tx); err != nil {
+			   log.Printf("Error seeding job positions: %v", err)
+			   return err
+	   }
 		
 		if err := SeedModuls(tx); err != nil {
 			log.Printf("Error seeding moduls: %v", err)
