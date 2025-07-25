@@ -13,19 +13,39 @@ import (
 )
 
 type JobPositionManagementHandler struct {
-	usecase adminUsecase.JobPositionManagementUsecase
+	   usecase adminUsecase.JobPositionManagementUsecase
 }
 
 func NewJobPositionManagementHandler(r *gin.Engine, uc adminUsecase.JobPositionManagementUsecase, db *gorm.DB) {
-	h := &JobPositionManagementHandler{uc}
-	admin := r.Group("/api/v1/admin")
-	admin.Use(middleware.AdminRoleMiddleware(db))
-	admin.POST("/job-positions", h.CreateJobPosition)
-	admin.GET("/job-positions", h.GetJobPositions)
-	admin.GET("/job-positions/:id", h.GetJobPositionByID)
-	admin.PUT("/job-positions/:id", h.UpdateJobPosition)
-	admin.DELETE("/job-positions/:id", h.DeleteJobPosition)
+	   h := &JobPositionManagementHandler{uc}
+	   admin := r.Group("/api/v1/admin")
+	   admin.Use(middleware.AdminRoleMiddleware(db))
+	   admin.POST("/job-positions", h.CreateJobPosition)
+	   admin.GET("/job-positions", h.GetJobPositions)
+	   admin.GET("/job-positions/:id", h.GetJobPositionByID)
+	   admin.GET("/job-positions/:id/edit", h.GetEditJobPositionPage)
+	   admin.PUT("/job-positions/:id", h.UpdateJobPosition)
+	   admin.DELETE("/job-positions/:id", h.DeleteJobPosition)
 }
+
+// GetEditJobPositionPage returns job position data for edit page
+func (h *JobPositionManagementHandler) GetEditJobPositionPage(c *gin.Context) {
+	   id := c.Param("id")
+
+	   // Fetch job position by ID
+	   jobPosition, err := h.usecase.GetJobPositionByID(id)
+	   if err != nil {
+			   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			   return
+	   }
+
+	   response := gin.H{
+			   "data": jobPosition,
+	   }
+
+	   c.JSON(http.StatusOK, response)
+}
+
 
 func (h *JobPositionManagementHandler) CreateJobPosition(c *gin.Context) {
 	var input dto.CreateJobPositionInput
@@ -47,43 +67,45 @@ func (h *JobPositionManagementHandler) CreateJobPosition(c *gin.Context) {
 }
 
 func (h *JobPositionManagementHandler) GetJobPositions(c *gin.Context) {
-	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
-	if err != nil || page < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page parameter"})
-		return
-	}
+	   page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	   if err != nil || page < 1 {
+			   c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page parameter"})
+			   return
+	   }
 
-	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
-	if err != nil || limit < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit parameter"})
-		return
-	}
+	   limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	   if err != nil || limit < 1 {
+			   c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit parameter"})
+			   return
+	   }
 
-	jobPositions, err := h.usecase.GetJobPositions(page, limit)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	   search := c.DefaultQuery("search", "")
 
-   var responseData []dto.JobPositionResponse
-   for _, jp := range jobPositions {
-	   responseData = append(responseData, dto.JobPositionResponse{
-		   ID:   jp.ID,
-		   Name: jp.Name,
-		   CreatedAt: jp.CreatedAt.Format("02-01-2006 15:04"),
-		   UpdatedAt: jp.UpdatedAt.Format("02-01-2006 15:04"),
-	   })
-   }
+	   jobPositions, err := h.usecase.GetJobPositions(page, limit, search)
+	   if err != nil {
+			   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			   return
+	   }
 
-	response := gin.H{
-		"data": responseData,
-		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
-		},
-	}
+	   var responseData []dto.JobPositionResponse
+	   for _, jp := range jobPositions {
+			   responseData = append(responseData, dto.JobPositionResponse{
+					   ID:   jp.ID,
+					   Name: jp.Name,
+					   CreatedAt: jp.CreatedAt.Format("02-01-2006 15:04"),
+					   UpdatedAt: jp.UpdatedAt.Format("02-01-2006 15:04"),
+			   })
+	   }
 
-	c.JSON(http.StatusOK, response)
+	   response := gin.H{
+			   "data": responseData,
+			   "pagination": gin.H{
+					   "page":  page,
+					   "limit": limit,
+			   },
+	   }
+
+	   c.JSON(http.StatusOK, response)
 }
 
 func (h *JobPositionManagementHandler) GetJobPositionByID(c *gin.Context) {

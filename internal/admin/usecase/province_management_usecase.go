@@ -6,11 +6,11 @@ import (
 )
 
 type ProvinceManagementUsecase interface {
-	CreateProvince(province *entity.Province) error
-	GetProvinces(page, limit int) ([]entity.Province, error)
-	GetProvinceByID(id string) (*entity.Province, error)
-	UpdateProvince(id string, province *entity.Province) error
-	DeleteProvince(id string) error
+	   CreateProvince(province *entity.Province) error
+	   GetProvinces(page, limit int, search string) ([]entity.Province, error)
+	   GetProvinceByID(id string) (*entity.Province, error)
+	   UpdateProvince(id string, province *entity.Province) error
+	   DeleteProvince(id string) error
 }
 
 type provinceManagementUsecase struct {
@@ -25,8 +25,8 @@ func (u *provinceManagementUsecase) CreateProvince(province *entity.Province) er
 	return u.repo.CreateProvince(province)
 }
 
-func (u *provinceManagementUsecase) GetProvinces(page, limit int) ([]entity.Province, error) {
-	return u.repo.GetProvinces(page, limit)
+func (u *provinceManagementUsecase) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
+	   return u.repo.GetProvinces(page, limit, search)
 }
 
 func (u *provinceManagementUsecase) GetProvinceByID(id string) (*entity.Province, error) {

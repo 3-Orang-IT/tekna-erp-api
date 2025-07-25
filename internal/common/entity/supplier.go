@@ -1,9 +1,13 @@
 package entity
 
+import (
+	"time"
+)
+
 type Supplier struct {
 	ID            uint   `gorm:"primaryKey"`
 	UserID        uint   `gorm:"not null"`
-	Code          string `gorm:"size:50;not null"`
+	Code          uint   `gorm:"not null;autoIncrement"`
 	Name          string `gorm:"size:255;not null"`
 	InvoiceName   string `gorm:"size:255;not null"`
 	NPWP          string `gorm:"size:50;not null"`
@@ -17,6 +21,8 @@ type Supplier struct {
 	BankAccount   string `gorm:"size:100"`
 	Type          string `gorm:"size:50"`
 	LogoFilename  string `gorm:"size:255"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 
 	User User `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;"`
 	City City `gorm:"foreignKey:CityID;constraint:OnDelete:SET NULL;"`
