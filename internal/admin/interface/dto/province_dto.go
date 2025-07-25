@@ -7,3 +7,8 @@ type CreateProvinceInput struct {
 type UpdateProvinceInput struct {
 	Name string `json:"name"`
 }
+
+type ProvinceResponse struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}

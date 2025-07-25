@@ -23,6 +23,7 @@ func NewCityManagementHandler(r *gin.Engine, uc adminUsecase.CityManagementUseca
 	admin.POST("/cities", h.CreateCity)
 	admin.GET("/cities", h.GetCities)
 	admin.GET("/cities/:id", h.GetCityByID)
+	admin.GET("/cities/:id/edit", h.GetEditCityPage)
 	admin.PUT("/cities/:id", h.UpdateCity)
 	admin.DELETE("/cities/:id", h.DeleteCity)
 }
@@ -60,7 +61,9 @@ func (h *CityManagementHandler) GetCities(c *gin.Context) {
 		return
 	}
 
-	cities, err := h.usecase.GetCities(page, limit)
+	search := c.DefaultQuery("search", "") // Added search query parameter
+
+	cities, err := h.usecase.GetCities(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -71,7 +74,7 @@ func (h *CityManagementHandler) GetCities(c *gin.Context) {
 		responseData = append(responseData, dto.CityResponse{
 			ID:       city.ID,
 			Name:     city.Name,
-			Province: city.Province,
+			Province: city.Province.Name,
 		})
 	}
 
@@ -133,4 +136,37 @@ func (h *CityManagementHandler) DeleteCity(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "city deleted successfully", "data": gin.H{"id": id}})
+}
+
+func (h *CityManagementHandler) GetEditCityPage(c *gin.Context) {
+	id := c.Param("id")
+
+	// Fetch city by ID
+	city, err := h.usecase.GetCityByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Fetch list of provinces
+	provinces, err := h.usecase.GetProvinces(1, 100, "") // Assuming a method exists to fetch provinces
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var provinceList []dto.ProvinceResponse
+	for _, province := range provinces {
+		provinceList = append(provinceList, dto.ProvinceResponse{
+			ID:   province.ID,
+			Name: province.Name,
+		})
+	}
+
+	response := gin.H{
+		"city":      city,
+		"provinces": provinceList,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
