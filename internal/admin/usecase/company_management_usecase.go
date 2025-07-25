@@ -7,10 +7,11 @@ import (
 
 type CompanyManagementUsecase interface {
 	CreateCompany(company *entity.Company) error
-	GetCompanies(page, limit int) ([]entity.Company, error)
+	GetCompanies(page, limit int, search string) ([]entity.Company, error)
 	GetCompanyByID(id string) (*entity.Company, error)
 	UpdateCompany(id string, company *entity.Company) error
 	DeleteCompany(id string) error
+	GetCities(page, limit int, search string) ([]entity.City, error) // New method for fetching cities
 }
 
 type companyManagementUsecase struct {
@@ -25,8 +26,8 @@ func (u *companyManagementUsecase) CreateCompany(company *entity.Company) error 
 	return u.repo.CreateCompany(company)
 }
 
-func (u *companyManagementUsecase) GetCompanies(page, limit int) ([]entity.Company, error) {
-	return u.repo.GetCompanies(page, limit)
+func (u *companyManagementUsecase) GetCompanies(page, limit int, search string) ([]entity.Company, error) {
+	return u.repo.GetCompanies(page, limit, search)
 }
 
 func (u *companyManagementUsecase) GetCompanyByID(id string) (*entity.Company, error) {
@@ -39,4 +40,9 @@ func (u *companyManagementUsecase) UpdateCompany(id string, company *entity.Comp
 
 func (u *companyManagementUsecase) DeleteCompany(id string) error {
 	return u.repo.DeleteCompany(id)
+}
+
+// GetCities fetches cities for the edit page
+func (u *companyManagementUsecase) GetCities(page, limit int, search string) ([]entity.City, error) {
+	return u.repo.GetCities(page, limit, search)
 }
