@@ -52,6 +52,26 @@ func Seed(db *gorm.DB) {
 			log.Printf("Error seeding product categories: %v", err)
 			return err
 		}
+		
+		if err := SeedSuppliers(tx); err != nil {
+			log.Printf("Error seeding suppliers: %v", err)
+			return err
+		}
+
+		if err := SeedBusinessUnits(tx); err != nil {
+			log.Printf("Error seeding business units: %v", err)
+			return err
+		}
+
+		if err := SeedUnitOfMeasures(tx); err != nil {
+			log.Printf("Error seeding unit of measures: %v", err)
+			return err
+		}
+
+		if err := SeedProducts(tx); err != nil {
+			log.Printf("Error seeding products: %v", err)
+			return err
+		}
 
 		return nil
 	})

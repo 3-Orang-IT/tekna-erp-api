@@ -64,6 +64,18 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	jobPositionManagementRepo := adminRepositoryImpl.NewJobPositionManagementRepository(db)
 	jobPositionManagementUsecase := adminUsecase.NewJobPositionManagementUsecase(jobPositionManagementRepo)
 
+	// Business Unit Management
+	businessUnitManagementRepo := adminRepositoryImpl.NewBusinessUnitManagementRepository(db)
+	businessUnitManagementUsecase := adminUsecase.NewBusinessUnitManagementUsecase(businessUnitManagementRepo)
+
+	// Unit of Measure Management
+	unitOfMeasureManagementRepo := adminRepositoryImpl.NewUnitOfMeasureManagementRepository(db)
+	unitOfMeasureManagementUsecase := adminUsecase.NewUnitOfMeasureManagementUsecase(unitOfMeasureManagementRepo)
+
+	// Product Management
+	productManagementRepo := adminRepositoryImpl.NewProductManagementRepository(db)
+	productManagementUsecase := adminUsecase.NewProductManagementUsecase(productManagementRepo)
+
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
 	adminHandler.NewUserManagementHandler(r, userManagementUsecase, db)
@@ -74,6 +86,9 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewProvinceManagementHandler(r, provinceManagementUsecase, db)
 	adminHandler.NewCityManagementHandler(r, cityManagementUsecase, db)
 	adminHandler.NewJobPositionManagementHandler(r, jobPositionManagementUsecase, db)
+	adminHandler.NewBusinessUnitManagementHandler(r, businessUnitManagementUsecase, db)
+	adminHandler.NewUnitOfMeasureManagementHandler(r, unitOfMeasureManagementUsecase, db)
+	adminHandler.NewProductManagementHandler(r, productManagementUsecase, db)
 
 	// Register Supplier handler
 	adminHandler.NewSupplierManagementHandler(r, supplierManagementUsecase, db)

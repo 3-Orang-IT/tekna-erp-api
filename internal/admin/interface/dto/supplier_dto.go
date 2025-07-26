@@ -1,7 +1,7 @@
 package dto
 
 type CreateSupplierInput struct {
-	UserID        uint   `json:"user_id" binding:"required"`
+	UserID        uint   `json:"user_id"`
 	Name          string `json:"name" binding:"required"`
 	InvoiceName   string `json:"invoice_name" binding:"required"`
 	NPWP          string `json:"npwp" binding:"required"`
