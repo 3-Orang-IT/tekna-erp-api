@@ -25,6 +25,7 @@ func NewMenuManagementHandler(r *gin.Engine, uc adminUsecase.MenuManagementUseca
 	admin.GET("/menus/:id", h.GetMenuByID)
 	admin.PUT("/menus/:id", h.UpdateMenu)
 	admin.DELETE("/menus/:id", h.DeleteMenu)
+	admin.GET("/menus/:id/edit", h.GetEditMenuPage) // New route for edit page
 }
 
 func (h *MenuManagementHandler) CreateMenu(c *gin.Context) {
@@ -40,7 +41,6 @@ func (h *MenuManagementHandler) CreateMenu(c *gin.Context) {
 		Icon:     input.Icon,
 		Order:    input.Order,
 		ParentID: input.ParentID,
-		ModulID:  input.ModulID,
 	}
 
 	if err := h.usecase.CreateMenu(&menu); err != nil {
@@ -64,7 +64,9 @@ func (h *MenuManagementHandler) GetMenus(c *gin.Context) {
 		return
 	}
 
-	menus, err := h.usecase.GetMenus(page, limit)
+	search := c.DefaultQuery("search", "") // Added search query parameter
+
+	menus, err := h.usecase.GetMenus(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -113,7 +115,6 @@ func (h *MenuManagementHandler) UpdateMenu(c *gin.Context) {
 		Icon:     input.Icon,
 		Order:    input.Order,
 		ParentID: input.ParentID,
-		ModulID:  input.ModulID,
 	}
 
 	if err := h.usecase.UpdateMenu(id, &menu); err != nil {
@@ -132,4 +133,19 @@ func (h *MenuManagementHandler) DeleteMenu(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "menu deleted successfully", "data": gin.H{"id": id}})
+}
+
+func (h *MenuManagementHandler) GetEditMenuPage(c *gin.Context) {
+	id := c.Param("id")
+	menu, err := h.usecase.GetMenuByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	response := gin.H{
+		"data":    menu,
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": response})
 }
