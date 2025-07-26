@@ -68,6 +68,11 @@ func Seed(db *gorm.DB) {
 			return err
 		}
 
+		if err := SeedProducts(tx); err != nil {
+			log.Printf("Error seeding products: %v", err)
+			return err
+		}
+
 		return nil
 	})
 }

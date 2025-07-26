@@ -72,6 +72,10 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	unitOfMeasureManagementRepo := adminRepositoryImpl.NewUnitOfMeasureManagementRepository(db)
 	unitOfMeasureManagementUsecase := adminUsecase.NewUnitOfMeasureManagementUsecase(unitOfMeasureManagementRepo)
 
+	// Product Management
+	productManagementRepo := adminRepositoryImpl.NewProductManagementRepository(db)
+	productManagementUsecase := adminUsecase.NewProductManagementUsecase(productManagementRepo)
+
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
 	adminHandler.NewUserManagementHandler(r, userManagementUsecase, db)
@@ -84,6 +88,7 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewJobPositionManagementHandler(r, jobPositionManagementUsecase, db)
 	adminHandler.NewBusinessUnitManagementHandler(r, businessUnitManagementUsecase, db)
 	adminHandler.NewUnitOfMeasureManagementHandler(r, unitOfMeasureManagementUsecase, db)
+	adminHandler.NewProductManagementHandler(r, productManagementUsecase, db)
 
 	// Register Supplier handler
 	adminHandler.NewSupplierManagementHandler(r, supplierManagementUsecase, db)
