@@ -31,8 +31,8 @@ func SeedMenus(db *gorm.DB) error {
 				{Name: "Kategori Produk", URL: "/master-data/kategori-produk", Icon: "TagIcon", Order: 2},
 				{Name: "Unit Satuan", URL: "/master-data/unit-satuan", Icon: "ScaleIcon", Order: 3},
 				{Name: "Brand/Merk", URL: "/master-data/brand", Icon: "SparklesIcon", Order: 4},
-				{Name: "Gudang/Warehouse", URL: "/master-data/gudang", Icon: "HomeModernIcon", Order: 5},
-				{Name: "Business", URL: "/master-data/business", Icon: "BriefcaseIcon", Order: 6},
+				{Name: "Business", URL: "/master-data/business", Icon: "BriefcaseIcon", Order: 5},
+				// {Name: "Gudang/Warehouse", URL: "/master-data/gudang", Icon: "HomeModernIcon", Order: 5},
 			}},
 			{Name: "Partner & Relasi", Icon: "HandshakeIcon", Order: 4, Children: []entity.Menu{
 				{Name: "Data Supplier", URL: "/master-data/supplier", Icon: "TruckIcon", Order: 1},
