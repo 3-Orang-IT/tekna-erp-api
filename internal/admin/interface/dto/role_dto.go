@@ -9,3 +9,8 @@ type UpdateRoleInput struct {
 	Name    string `json:"name"`
 	MenuIDs []uint `json:"menu_ids"`
 }
+
+type RoleResponse struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}

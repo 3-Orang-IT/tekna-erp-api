@@ -7,10 +7,11 @@ import (
 
 type UserManagementUsecase interface {
 	CreateUser(user *entity.User) error
-	GetUsers(page, limit int) ([]entity.User, error)
+	GetUsers(page, limit int, search string) ([]entity.User, error)
 	GetUserByID(id string) (*entity.User, error)
 	UpdateUser(id string, user *entity.User) error
 	DeleteUser(id string) error
+	GetAllRoles() ([]entity.Role, error)
 }
 
 type userManagementUsecase struct {
@@ -25,8 +26,8 @@ func (u *userManagementUsecase) CreateUser(user *entity.User) error {
 	return u.repo.CreateUser(user)
 }
 
-func (u *userManagementUsecase) GetUsers(page, limit int) ([]entity.User, error) {
-	return u.repo.GetUsers(page, limit)
+func (u *userManagementUsecase) GetUsers(page, limit int, search string) ([]entity.User, error) {
+	return u.repo.GetUsers(page, limit, search)
 }
 
 func (u *userManagementUsecase) GetUserByID(id string) (*entity.User, error) {
@@ -39,4 +40,8 @@ func (u *userManagementUsecase) UpdateUser(id string, user *entity.User) error {
 
 func (u *userManagementUsecase) DeleteUser(id string) error {
 	return u.repo.DeleteUser(id)
+}
+
+func (u *userManagementUsecase) GetAllRoles() ([]entity.Role, error) {
+	return u.repo.GetAllRoles()
 }

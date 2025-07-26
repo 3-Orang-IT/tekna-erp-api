@@ -32,6 +32,7 @@ func NewUserManagementHandler(r *gin.Engine, uc adminUsecase.UserManagementUseca
 	admin.GET("/users/:id", h.GetUserByID)
 	admin.PUT("/users/:id", h.UpdateUser)
 	admin.DELETE("/users/:id", h.DeleteUser)
+	admin.GET("/users/:id/edit", h.GetEditUserPage)
 }
 
 func validateUser(user *entity.User) error {
@@ -145,7 +146,9 @@ func (h *UserManagementHandler) GetUsers(c *gin.Context) {
 		return
 	}
 
-	users, err := h.usecase.GetUsers(page, limit)
+	search := c.DefaultQuery("search", "") // Added search query parameter
+
+	users, err := h.usecase.GetUsers(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -325,4 +328,64 @@ func (h *UserManagementHandler) DeleteUser(c *gin.Context) {
 		"message": "user deleted successfully",
 		"data": gin.H{"id": id},
 	})
+}
+
+func (h *UserManagementHandler) GetEditUserPage(c *gin.Context) {
+	id := c.Param("id")
+	user, err := h.usecase.GetUserByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	// Fetch all roles
+	roles, err := h.usecase.GetAllRoles()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch roles"})
+		return
+	}
+
+	// Map roles to response format
+	var roleResponses []dto.RoleResponse
+	for _, role := range roles {
+		roleResponses = append(roleResponses, dto.RoleResponse{
+			ID:   role.ID,
+			Name: role.Name,
+		})
+	}
+
+	// Convert roles to []string
+	var roleNames []string
+	for _, role := range user.Role {
+		roleNames = append(roleNames, role.Name)
+	}
+	
+	baseUrl := os.Getenv("BASE_URL")
+	var photoURL string
+	if user.PhotoProfileURL != "" {
+		photoURL = baseUrl + user.PhotoProfileURL
+	} else {
+		photoURL = ""
+	}
+
+	// Map ke response DTO
+	response := gin.H{
+		"data": gin.H{
+			"id":              user.ID,
+			"username":        user.Username,
+			"name":            user.Name,
+			"email":           user.Email,
+			"telp":            user.Telp,
+			"photo_profile_url": photoURL,
+			"status":          user.Status,
+			"roles":           roleNames,
+			"created_at":      user.CreatedAt,
+			"updated_at":      user.UpdatedAt,
+		},
+		"reference": gin.H{
+			"roles":    roleResponses,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
 }
