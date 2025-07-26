@@ -7,10 +7,11 @@ import (
 
 type RoleManagementUsecase interface {
 	CreateRole(role *entity.Role) error
-	GetRoles(page, limit int) ([]entity.Role, error)
+	GetRoles(page, limit int, search string) ([]entity.Role, error)
 	GetRoleByID(id string) (*entity.Role, error)
 	UpdateRole(id string, role *entity.Role) error
 	DeleteRole(id string) error
+	GetAllMenus(menus *[]entity.Menu) error
 }
 
 type roleManagementUsecase struct {
@@ -25,8 +26,8 @@ func (u *roleManagementUsecase) CreateRole(role *entity.Role) error {
 	return u.repo.CreateRole(role)
 }
 
-func (u *roleManagementUsecase) GetRoles(page, limit int) ([]entity.Role, error) {
-	return u.repo.GetRoles(page, limit)
+func (u *roleManagementUsecase) GetRoles(page, limit int, search string) ([]entity.Role, error) {
+	return u.repo.GetRoles(page, limit, search)
 }
 
 func (u *roleManagementUsecase) GetRoleByID(id string) (*entity.Role, error) {
@@ -39,4 +40,8 @@ func (u *roleManagementUsecase) UpdateRole(id string, role *entity.Role) error {
 
 func (u *roleManagementUsecase) DeleteRole(id string) error {
 	return u.repo.DeleteRole(id)
+}
+
+func (u *roleManagementUsecase) GetAllMenus(menus *[]entity.Menu) error {
+	return u.repo.GetAllMenus(menus)
 }

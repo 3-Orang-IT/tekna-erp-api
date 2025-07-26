@@ -23,6 +23,7 @@ func NewRoleManagementHandler(r *gin.Engine, uc adminUsecase.RoleManagementUseca
 	admin.POST("/roles", h.CreateRole)
 	admin.GET("/roles", h.GetRoles)
 	admin.GET("/roles/:id", h.GetRoleByID)
+	admin.GET("/roles/:id/edit", h.GetRoleEditPage)
 	admin.PUT("/roles/:id", h.UpdateRole)
 	admin.DELETE("/roles/:id", h.DeleteRole)
 }
@@ -65,7 +66,9 @@ func (h *RoleManagementHandler) GetRoles(c *gin.Context) {
 		return
 	}
 
-	roles, err := h.usecase.GetRoles(page, limit)
+	search := c.DefaultQuery("search", "")
+
+	roles, err := h.usecase.GetRoles(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -90,7 +93,13 @@ func (h *RoleManagementHandler) GetRoleByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": role})
+	response := dto.RoleResponse{
+		ID:   role.ID,
+		Name: role.Name,
+		Menus: role.Menus,
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": response})
 }
 
 func (h *RoleManagementHandler) UpdateRole(c *gin.Context) {
@@ -135,4 +144,33 @@ func (h *RoleManagementHandler) DeleteRole(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "role deleted successfully", "data": gin.H{"id": id}})
+}
+
+func (h *RoleManagementHandler) GetRoleEditPage(c *gin.Context) {
+	id := c.Param("id")
+	role, err := h.usecase.GetRoleByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Fetch all menus for reference
+	var menus []entity.Menu
+	if err := h.usecase.GetAllMenus(&menus); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	response := gin.H{
+		"data": dto.RoleResponse{
+			ID:   role.ID,
+			Name: role.Name,
+			Menus: role.Menus,
+		},
+		"reference": gin.H{
+			"menus": menus,
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": response})
 }
