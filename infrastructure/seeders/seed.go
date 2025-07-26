@@ -52,6 +52,11 @@ func Seed(db *gorm.DB) {
 			log.Printf("Error seeding product categories: %v", err)
 			return err
 		}
+		
+		if err := SeedSuppliers(tx); err != nil {
+			log.Printf("Error seeding suppliers: %v", err)
+			return err
+		}
 
 		return nil
 	})
