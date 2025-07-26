@@ -85,5 +85,8 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	// Register Product Category handler
 	adminHandler.NewProductCategoryManagementHandler(r, productCategoryManagementUsecase)
 
+	// Serve static files for uploaded profile images
+	r.Static("/uploads/profile", "./uploads/profile")
+
 	return r
 }
