@@ -58,6 +58,11 @@ func Seed(db *gorm.DB) {
 			return err
 		}
 
+		if err := SeedBusinessUnits(tx); err != nil {
+			log.Printf("Error seeding business units: %v", err)
+			return err
+		}
+
 		return nil
 	})
 }
