@@ -63,6 +63,11 @@ func Seed(db *gorm.DB) {
 			return err
 		}
 
+		if err := SeedUnitOfMeasures(tx); err != nil {
+			log.Printf("Error seeding unit of measures: %v", err)
+			return err
+		}
+
 		return nil
 	})
 }
