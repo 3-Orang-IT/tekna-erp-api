@@ -22,8 +22,8 @@ func SeedMenus(db *gorm.DB) error {
 				{Name: "Data Pengguna", URL: "/master-data/pengguna", Icon: "UserIcon", Order: 1},
 				{Name: "Role & Permission", URL: "/master-data/role-permission", Icon: "LockClosedIcon", Order: 2},
 				{Name: "Level Akses", URL: "/master-data/level-akses", Icon: "ShieldCheckIcon", Order: 3},
-				{Name: "Data Modul", URL: "/master-data/modul", Icon: "CubeIcon", Order: 4},
-				{Name: "Data Menu", URL: "/master-data/menu", Icon: "CubeIcon", Order: 5},
+				{Name: "Data Menu", URL: "/master-data/menu", Icon: "CubeIcon", Order: 4},
+				// {Name: "Data Modul", URL: "/master-data/modul", Icon: "CubeIcon", Order: 4},
 				// {Name: "User Activity Log", URL: "/master-data/user-activity", Icon: "ClockIcon", Order: 4},
 			}},
 			{Name: "Produk & Inventory", Icon: "CubeIcon", Order: 3, Children: []entity.Menu{

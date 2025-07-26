@@ -7,7 +7,7 @@ import (
 
 type MenuManagementUsecase interface {
 	CreateMenu(menu *entity.Menu) error
-	GetMenus(page, limit int) ([]entity.Menu, error)
+	GetMenus(page, limit int, search string) ([]entity.Menu, error)
 	GetMenuByID(id string) (*entity.Menu, error)
 	UpdateMenu(id string, menu *entity.Menu) error
 	DeleteMenu(id string) error
@@ -25,8 +25,8 @@ func (u *menuManagementUsecase) CreateMenu(menu *entity.Menu) error {
 	return u.repo.CreateMenu(menu)
 }
 
-func (u *menuManagementUsecase) GetMenus(page, limit int) ([]entity.Menu, error) {
-	return u.repo.GetMenus(page, limit)
+func (u *menuManagementUsecase) GetMenus(page, limit int, search string) ([]entity.Menu, error) {
+	return u.repo.GetMenus(page, limit, search)
 }
 
 func (u *menuManagementUsecase) GetMenuByID(id string) (*entity.Menu, error) {

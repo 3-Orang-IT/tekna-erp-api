@@ -40,9 +40,6 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	menuManagementRepo := adminRepositoryImpl.NewMenuManagementRepository(db)
 	menuManagementUsecase := adminUsecase.NewMenuManagementUsecase(menuManagementRepo)
 	
-	modulManagementRepo := adminRepositoryImpl.NewModulManagementRepository(db)
-	modulManagementUsecase := adminUsecase.NewModulManagementUsecase(modulManagementRepo)
-	
 	devisionManagementRepo := adminRepositoryImpl.NewDivisionManagementRepository(db)
 	devisionManagementUsecase := adminUsecase.NewDivisionManagementUsecase(devisionManagementRepo)
 
@@ -72,7 +69,6 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewUserManagementHandler(r, userManagementUsecase, db)
 	adminHandler.NewRoleManagementHandler(r, roleManagementUsecase, db)
 	adminHandler.NewMenuManagementHandler(r, menuManagementUsecase, db)
-	adminHandler.NewModulManagementHandler(r, modulManagementUsecase, db)
 	adminHandler.NewDivisionManagementHandler(r, devisionManagementUsecase, db)
 	adminHandler.NewCompanyManagementHandler(r, companyManagementUsecase, db)
 	adminHandler.NewProvinceManagementHandler(r, provinceManagementUsecase, db)

@@ -6,7 +6,6 @@ type CreateMenuInput struct {
 	Icon     string `json:"icon"`
 	Order    int    `json:"order" binding:"required"`
 	ParentID *uint  `json:"parent_id"`
-	ModulID  uint   `json:"modul_id" binding:"required"`
 }
 
 type UpdateMenuInput struct {
@@ -15,5 +14,4 @@ type UpdateMenuInput struct {
 	Icon     string `json:"icon"`
 	Order    int    `json:"order"`
 	ParentID *uint  `json:"parent_id"`
-	ModulID  uint   `json:"modul_id"`
 }

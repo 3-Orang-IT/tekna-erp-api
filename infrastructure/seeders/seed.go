@@ -28,11 +28,6 @@ func Seed(db *gorm.DB) {
 			   return err
 	   }
 		
-		if err := SeedModuls(tx); err != nil {
-			log.Printf("Error seeding moduls: %v", err)
-			return err
-		}
-		
 		if err := SeedMenus(tx); err != nil {
 			log.Printf("Error seeding menus: %v", err)
 			return err
