@@ -11,6 +11,7 @@ var models = []interface{}{
 	&entity.User{},
 	&entity.Role{},
 	&entity.Menu{},
+	&entity.Area{},
 	&entity.Company{},
 	&entity.City{},
 	&entity.Province{},
