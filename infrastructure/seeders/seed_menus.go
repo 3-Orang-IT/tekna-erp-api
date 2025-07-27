@@ -15,6 +15,7 @@ func SeedMenus(db *gorm.DB) error {
 				{Name: "Data Perusahaan", URL: "/master-data/perusahaan", Icon: "BuildingIcon", Order: 1},
 				{Name: "Data Divisi", URL: "/master-data/divisi", Icon: "RectangleStackIcon", Order: 2},
 				{Name: "Data Jabatan", URL: "/master-data/jabatan", Icon: "IdentificationIcon", Order: 3},
+				{Name: "Data Pegawai", URL: "/master-data/pegawai", Icon: "IdentificationIcon", Order: 4},
 				// {Name: "Data Departemen", URL: "/master-data/departemen", Icon: "UserGroupIcon", Order: 4},
 				// {Name: "Struktur Organisasi", URL: "/master-data/struktur-organisasi", Icon: "ChartBarIcon", Order: 5},
 			}},
