@@ -93,6 +93,11 @@ func Seed(db *gorm.DB) {
 			return err
 		}
 
+		if err := SeedToDoTemplates(tx); err != nil {
+			log.Printf("Error seeding to-do templates: %v", err)
+			return err
+		}
+
 		return nil
 	})
 }
