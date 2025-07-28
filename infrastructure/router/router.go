@@ -80,6 +80,18 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	employeeManagementRepo := adminRepositoryImpl.NewEmployeeManagementRepository(db)
 	employeeManagementUsecase := adminUsecase.NewEmployeeManagementUsecase(employeeManagementRepo)
 
+	// Customer Management
+	customerManagementRepo := adminRepositoryImpl.NewCustomerManagementRepository(db)
+	customerManagementUsecase := adminUsecase.NewCustomerManagementUsecase(customerManagementRepo)
+
+	// Chart of Account Management
+	chartOfAccountManagementRepo := adminRepositoryImpl.NewChartOfAccountManagementRepository(db)
+	chartOfAccountManagementUsecase := adminUsecase.NewChartOfAccountManagementUsecase(chartOfAccountManagementRepo)
+	
+	// Bank Account Management
+	bankAccountManagementRepo := adminRepositoryImpl.NewBankAccountManagementRepository(db)
+	bankAccountManagementUsecase := adminUsecase.NewBankAccountManagementUsecase(bankAccountManagementRepo)
+
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
 	adminHandler.NewUserManagementHandler(r, userManagementUsecase, db)
@@ -95,12 +107,11 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewBusinessUnitManagementHandler(r, businessUnitManagementUsecase, db)
 	adminHandler.NewUnitOfMeasureManagementHandler(r, unitOfMeasureManagementUsecase, db)
 	adminHandler.NewProductManagementHandler(r, productManagementUsecase, db)
-
-	// Register Supplier handler
 	adminHandler.NewSupplierManagementHandler(r, supplierManagementUsecase, db)
-
-	// Register Product Category handler
 	adminHandler.NewProductCategoryManagementHandler(r, productCategoryManagementUsecase)
+	adminHandler.NewCustomerManagementHandler(r, customerManagementUsecase, db)
+	adminHandler.NewChartOfAccountManagementHandler(r, chartOfAccountManagementUsecase, db)
+	adminHandler.NewBankAccountManagementHandler(r, bankAccountManagementUsecase, db)
 
 	// Serve static files for uploaded profile images
 	r.Static("/uploads/profile", "./uploads/profile")

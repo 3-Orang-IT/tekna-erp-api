@@ -38,8 +38,8 @@ func SeedMenus(db *gorm.DB) error {
 			{Name: "Partner & Relasi", Icon: "HandshakeIcon", Order: 4, Children: []entity.Menu{
 				{Name: "Data Supplier", URL: "/master-data/supplier", Icon: "TruckIcon", Order: 1},
 				{Name: "Data Customer", URL: "/master-data/customer", Icon: "UserCircleIcon", Order: 2},
-				{Name: "Data Vendor", URL: "/master-data/vendor", Icon: "BuildingStorefrontIcon", Order: 3},
-				{Name: "Kategori Partner", URL: "/master-data/kategori-partner", Icon: "FolderIcon", Order: 4},
+				// {Name: "Data Vendor", URL: "/master-data/vendor", Icon: "BuildingStorefrontIcon", Order: 3},
+				// {Name: "Kategori Partner", URL: "/master-data/kategori-partner", Icon: "FolderIcon", Order: 4},
 			}},
 			{Name: "Keuangan & Akuntansi", Icon: "CurrencyDollarIcon", Order: 5, Children: []entity.Menu{
 				{Name: "Data Rekening Bank", URL: "/master-data/rekening-bank", Icon: "BanknotesIcon", Order: 1},
