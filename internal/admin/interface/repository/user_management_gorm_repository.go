@@ -81,3 +81,16 @@ func (r *userManagementRepo) GetAllRoles() ([]entity.Role, error) {
 	}
 	return roles, nil
 }
+
+// Method to get total count of users for pagination
+func (r *userManagementRepo) GetUsersCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.User{})
+	if search != "" {
+		query = query.Where("username LIKE ? OR email LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
