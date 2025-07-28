@@ -59,3 +59,16 @@ func (r *jobPositionManagementRepo) DeleteJobPosition(id string) error {
 	}
 	return r.db.Delete(&jobPosition).Error
 }
+
+// Method to get total count of job positions for pagination
+func (r *jobPositionManagementRepo) GetJobPositionsCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.JobPosition{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
