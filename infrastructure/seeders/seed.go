@@ -83,6 +83,11 @@ func Seed(db *gorm.DB) {
 			return err
 		}
 
+		if err := SeedChartOfAccounts(tx); err != nil {
+			log.Printf("Error seeding chart of accounts: %v", err)
+			return err
+		}
+
 		return nil
 	})
 }
