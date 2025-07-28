@@ -7,6 +7,7 @@ import (
 
 type EmployeeManagementUsecase interface {
     CreateEmployee(employee *entity.Employee) error
+    CreateEmployeeWithUser(user *entity.User, employee *entity.Employee, roleIDs []uint) error
     GetEmployees(page, limit int, search string) ([]entity.Employee, error)
     GetEmployeeByID(id string) (*entity.Employee, error)
     UpdateEmployee(id string, employee *entity.Employee) error
@@ -18,6 +19,8 @@ type EmployeeManagementUsecase interface {
     GetDivisions(page, limit int, search string) ([]entity.Division, error)
     GetCities(page, limit int, search string) ([]entity.City, error)
     GetProvinces(page, limit int, search string) ([]entity.Province, error)
+    // Method to get users that can be assigned to employees
+    GetUsers(page, limit int, search string) ([]entity.User, error)
 }
 
 type employeeManagementUsecase struct {
@@ -71,4 +74,14 @@ func (u *employeeManagementUsecase) GetCities(page, limit int, search string) ([
 // GetProvinces fetches provinces with their cities for the edit page
 func (u *employeeManagementUsecase) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
     return u.repo.GetProvinces(page, limit, search)
+}
+
+// CreateEmployeeWithUser creates a new user and assigns them as an employee
+func (u *employeeManagementUsecase) CreateEmployeeWithUser(user *entity.User, employee *entity.Employee, roleIDs []uint) error {
+    return u.repo.CreateEmployeeWithUser(user, employee, roleIDs)
+}
+
+// GetUsers fetches users that can be assigned to employees
+func (u *employeeManagementUsecase) GetUsers(page, limit int, search string) ([]entity.User, error) {
+    return u.repo.GetUsers(page, limit, search)
 }

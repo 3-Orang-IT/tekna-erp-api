@@ -134,3 +134,48 @@ func (r *employeeManagementRepo) GetProvinces(page, limit int, search string) ([
     }
     return provinces, nil
 }
+
+// CreateEmployeeWithUser creates a new user and assigns them as an employee in a transaction
+func (r *employeeManagementRepo) CreateEmployeeWithUser(user *entity.User, employee *entity.Employee, roleIDs []uint) error {
+    return r.db.Transaction(func(tx *gorm.DB) error {
+        // Create user first
+        if err := tx.Create(user).Error; err != nil {
+            return err
+        }
+
+        // Assign roles to user
+        if len(roleIDs) > 0 {
+            for _, roleID := range roleIDs {
+                if err := tx.Exec("INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)", user.ID, roleID).Error; err != nil {
+                    return err
+                }
+            }
+        }
+
+        // Assign user ID to employee
+        employee.UserID = user.ID
+
+        // Create employee
+        if err := tx.Create(employee).Error; err != nil {
+            return err
+        }
+
+        return nil
+    })
+}
+
+// GetUsers fetches users that can be assigned to employees
+func (r *employeeManagementRepo) GetUsers(page, limit int, search string) ([]entity.User, error) {
+    var users []entity.User
+    offset := (page - 1) * limit
+    query := r.db
+    if search != "" {
+        searchStr := "%" + strings.ToLower(search) + "%"
+        query = query.Where("LOWER(name) LIKE ? OR LOWER(username) LIKE ? OR LOWER(email) LIKE ?", 
+            searchStr, searchStr, searchStr)
+    }
+    if err := query.Preload("Role").Limit(limit).Offset(offset).Find(&users).Error; err != nil {
+        return nil, err
+    }
+    return users, nil
+}

@@ -4,6 +4,7 @@ import "github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 
 type EmployeeManagementRepository interface {
     CreateEmployee(employee *entity.Employee) error
+    CreateEmployeeWithUser(user *entity.User, employee *entity.Employee, roleIDs []uint) error
     GetEmployees(page, limit int, search string) ([]entity.Employee, error)
     GetEmployeeByID(id string) (*entity.Employee, error)
     UpdateEmployee(id string, employee *entity.Employee) error
@@ -15,4 +16,6 @@ type EmployeeManagementRepository interface {
     GetDivisions(page, limit int, search string) ([]entity.Division, error)
     GetCities(page, limit int, search string) ([]entity.City, error)
     GetProvinces(page, limit int, search string) ([]entity.Province, error)
+    // Method to get users that can be assigned to employees
+    GetUsers(page, limit int, search string) ([]entity.User, error)
 }
