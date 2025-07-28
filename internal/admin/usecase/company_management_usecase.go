@@ -13,6 +13,7 @@ type CompanyManagementUsecase interface {
 	DeleteCompany(id string) error
 	GetCities(page, limit int, search string) ([]entity.City, error) // Method for fetching cities
 	GetProvinces(page, limit int, search string) ([]entity.Province, error) // Method for fetching provinces with cities
+	GetCompaniesCount(search string) (int64, error) // Method to get total count of companies for pagination
 }
 
 type companyManagementUsecase struct {
@@ -51,4 +52,9 @@ func (u *companyManagementUsecase) GetCities(page, limit int, search string) ([]
 // GetProvinces fetches provinces with their cities for the add company page
 func (u *companyManagementUsecase) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
 	return u.repo.GetProvinces(page, limit, search)
+}
+
+// GetCompaniesCount gets the total count of companies for pagination
+func (u *companyManagementUsecase) GetCompaniesCount(search string) (int64, error) {
+	return u.repo.GetCompaniesCount(search)
 }
