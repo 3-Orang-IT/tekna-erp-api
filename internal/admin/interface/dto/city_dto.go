@@ -15,3 +15,8 @@ type CityResponse struct {
 	Name     string          `json:"name"`
 	Province string          `json:"province"`
 }
+
+type CityWithoutProvinceResponse struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
