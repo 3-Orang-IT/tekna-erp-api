@@ -31,6 +31,7 @@ type UpdateCompanyInput struct {
 }
 
 type CompanyResponse struct {
+	ID               uint    `json:"id"`
 	Name             string  `json:"name"`
 	Address          string  `json:"address"`
 	City             string  `json:"city"`

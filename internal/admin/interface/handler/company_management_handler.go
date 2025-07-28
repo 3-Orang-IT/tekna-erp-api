@@ -22,6 +22,7 @@ func NewCompanyManagementHandler(r *gin.Engine, uc adminUsecase.CompanyManagemen
 	admin.Use(middleware.AdminRoleMiddleware(db))
 	admin.POST("/companies", h.CreateCompany)
 	admin.GET("/companies", h.GetCompanies)
+	admin.GET("/companies/add", h.GetAddCompanyPage) // New route for add page
 	admin.GET("/companies/:id", h.GetCompanyByID)
 	admin.GET("/companies/:id/edit", h.GetEditCompanyPage)
 	admin.PUT("/companies/:id", h.UpdateCompany)
@@ -83,6 +84,7 @@ func (h *CompanyManagementHandler) GetCompanies(c *gin.Context) {
 	var responseData []dto.CompanyResponse
 	for _, company := range companies {
 		responseData = append(responseData, dto.CompanyResponse{
+			ID:               company.ID,
 			Name:             company.Name,
 			Address:          company.Address,
 			City:             company.City.Name,
@@ -236,4 +238,42 @@ func (h *CompanyManagementHandler) GetEditCompanyPage(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+// GetAddCompanyPage returns provinces and cities for the add company page
+func (h *CompanyManagementHandler) GetAddCompanyPage(c *gin.Context) {
+	// Fetch list of provinces with their cities
+	provinces, err := h.usecase.GetProvinces(1, 1000, "") // Need to implement this method
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Transform the data to the desired response structure
+	var provincesWithCities []dto.ProvinceResponseWithCity
+	for _, province := range provinces {
+		// Create a province object with cities
+		provinceObj := dto.ProvinceResponseWithCity{
+			ID:   province.ID,
+			Name: province.Name,
+		}
+		
+		// Get cities for this province
+		var citiesList []dto.CityResponse
+		for _, city := range province.Cities {
+			citiesList = append(citiesList, dto.CityResponse{
+				ID:   city.ID,
+				Name: city.Name,
+			})
+		}
+		provinceObj.Cities = citiesList
+		provincesWithCities = append(provincesWithCities, provinceObj)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"provinces": provincesWithCities,
+		},
+	})
+		
 }

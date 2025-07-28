@@ -12,3 +12,9 @@ type ProvinceResponse struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
+
+type ProvinceResponseWithCity struct {
+	ID      uint            `json:"id"`
+	Name    string          `json:"name"`
+	Cities  []CityResponse `json:"cities"`
+}
