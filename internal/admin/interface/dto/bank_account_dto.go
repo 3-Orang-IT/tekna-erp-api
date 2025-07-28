@@ -30,5 +30,6 @@ type BankAccountResponse struct {
 	Province         string `json:"province"`
 	PhoneNumber      string `json:"phone_number"`
 	Priority         int    `json:"priority"`
-	UpdatedAt        string `json:"updated_at"`
+	CreatedAt        string  `json:"created_at"`
+	UpdatedAt        string  `json:"updated_at"`
 }

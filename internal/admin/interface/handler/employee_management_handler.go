@@ -20,8 +20,10 @@ func NewEmployeeManagementHandler(r *gin.Engine, uc adminUsecase.EmployeeManagem
     h := &EmployeeManagementHandler{uc}
     admin := r.Group("/api/v1/admin")
     admin.Use(middleware.AdminRoleMiddleware(db))
-    admin.POST("/employees", h.CreateEmployee)
+    admin.POST("/employees", h.CreateEmployee)                  // Create employee for existing user
+    admin.POST("/employees/with-user", h.CreateEmployeeWithUser) // Create employee with new user
     admin.GET("/employees", h.GetEmployees)
+    admin.GET("/employees/add", h.GetAddEmployeePage)           // New route for add page
     admin.GET("/employees/:id", h.GetEmployeeByID)
     admin.GET("/employees/:id/edit", h.GetEditEmployeePage)
     admin.PUT("/employees/:id", h.UpdateEmployee)
@@ -36,7 +38,7 @@ func (h *EmployeeManagementHandler) CreateEmployee(c *gin.Context) {
     }
 
     employee := entity.Employee{
-        UserID:            input.UserID,
+        UserID:           input.UserID,
         JobPositionID:     input.JobPositionID,
         DivisionID:        input.DivisionID,
         CityID:            input.CityID,
@@ -50,6 +52,16 @@ func (h *EmployeeManagementHandler) CreateEmployee(c *gin.Context) {
         KTPStatus:         input.KTPStatus,
         ContractNo:        input.ContractNo,
         NPWPStatus:        input.NPWPStatus,
+        ContractStatus:    input.ContractStatus,
+        Status:            input.Status,
+    }
+
+    // Set default values if not provided
+    if employee.Status == "" {
+        employee.Status = "active"
+    }
+    if employee.ContractStatus == "" {
+        employee.ContractStatus = "active"
     }
 
     if err := h.usecase.CreateEmployee(&employee); err != nil {
@@ -57,7 +69,42 @@ func (h *EmployeeManagementHandler) CreateEmployee(c *gin.Context) {
         return
     }
 
-    c.JSON(http.StatusCreated, gin.H{"message": "employee created successfully", "data": employee})
+    // Fetch the created employee with its relations
+    createdEmployee, err := h.usecase.GetEmployeeByID(strconv.FormatUint(uint64(employee.ID), 10))
+    if err != nil {
+        c.JSON(http.StatusOK, gin.H{
+            "message": "employee created successfully, but could not fetch details",
+            "data": employee,
+        })
+        return
+    }
+
+    // Format the response with related data
+    response := dto.EmployeeResponse{
+        ID:               createdEmployee.ID,
+        UserID:           createdEmployee.UserID,
+        Name:             createdEmployee.User.Name,
+        JobPosition:      createdEmployee.JobPosition.Name,
+        Division:         createdEmployee.Division.Name,
+        City:             createdEmployee.City.Name,
+        NIP:              createdEmployee.NIP,
+        NIK:              createdEmployee.NIK,
+        BPJSEmploymentNo: createdEmployee.BPJSEmploymentNo,
+        BPJSHealthNo:     createdEmployee.BPJSHealthNo,
+        Address:          createdEmployee.Address,
+        Phone:            createdEmployee.Phone,
+        JoinDate:         createdEmployee.JoinDate,
+        KTPStatus:        createdEmployee.KTPStatus,
+        ContractNo:       createdEmployee.ContractNo,
+        NPWPStatus:       createdEmployee.NPWPStatus,
+        CreatedAt:        createdEmployee.CreatedAt.Format("2006-01-02 15:04:05"),
+        UpdatedAt:        createdEmployee.UpdatedAt.Format("2006-01-02 15:04:05"),
+    }
+
+    c.JSON(http.StatusCreated, gin.H{
+        "message": "employee created successfully", 
+        "data": response,
+    })
 }
 
 func (h *EmployeeManagementHandler) GetEmployees(c *gin.Context) {
@@ -113,7 +160,8 @@ func (h *EmployeeManagementHandler) GetEmployees(c *gin.Context) {
             KTPStatus:         employee.KTPStatus,
             ContractNo:        employee.ContractNo,
             NPWPStatus:        employee.NPWPStatus,
-            UpdatedAt:         "", // Fill if you have UpdatedAt field
+            CreatedAt:         employee.CreatedAt.Format("2006-01-02 15:04:05"),
+            UpdatedAt:         employee.UpdatedAt.Format("2006-01-02 15:04:05"),
         })
     }
 
@@ -155,7 +203,8 @@ func (h *EmployeeManagementHandler) GetEmployeeByID(c *gin.Context) {
         KTPStatus:         employee.KTPStatus,
         ContractNo:        employee.ContractNo,
         NPWPStatus:        employee.NPWPStatus,
-        UpdatedAt:         "", // Fill if you have UpdatedAt field
+        CreatedAt:         employee.CreatedAt.Format("2006-01-02 15:04:05"),
+        UpdatedAt:         employee.UpdatedAt.Format("2006-01-02 15:04:05"),
     }
 
     c.JSON(http.StatusOK, gin.H{"data": response})
@@ -216,11 +265,249 @@ func (h *EmployeeManagementHandler) GetEditEmployeePage(c *gin.Context) {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
-    // For references, you can fetch related data if needed (e.g., job positions, divisions, cities)
-    // Here, just return the employee data for simplicity
+    
+    // Fetch job positions for reference
+    jobPositions, err := h.usecase.GetJobPositions(1, 1000, "")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    var jobPositionList []dto.JobPositionResponse
+    for _, jp := range jobPositions {
+        jobPositionList = append(jobPositionList, dto.JobPositionResponse{
+            ID:   jp.ID,
+            Name: jp.Name,
+            CreatedAt: jp.CreatedAt.Format("02-01-2006 15:04:05"),
+            UpdatedAt: jp.UpdatedAt.Format("02-01-2006 15:04:05"),
+        })
+    }
+    
+    // Fetch divisions for reference
+    divisions, err := h.usecase.GetDivisions(1, 1000, "")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    var divisionList []dto.DivisionResponse
+    for _, division := range divisions {
+        divisionList = append(divisionList, dto.DivisionResponse{
+            ID:   division.ID,
+            Name: division.Name,
+            CreatedAt: division.CreatedAt.Format("02-01-2006 15:04:05"),
+            UpdatedAt: division.UpdatedAt.Format("02-01-2006 15:04:05"),
+        })
+    }
+    
+    // Fetch cities for reference
+    cities, err := h.usecase.GetCities(1, 1000, "")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    var cityList []dto.CityResponse
+    for _, city := range cities {
+        cityList = append(cityList, dto.CityResponse{
+            ID:       city.ID,
+            Name:     city.Name,
+            Province: city.Province.Name,
+        })
+    }
+    
+    // Fetch provinces with cities for reference
+    provinces, err := h.usecase.GetProvinces(1, 1000, "")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    var provinceList []dto.ProvinceResponseWithCity
+    for _, province := range provinces {
+        var citiesInProvince []dto.CityWithoutProvinceResponse
+        for _, city := range province.Cities {
+            citiesInProvince = append(citiesInProvince, dto.CityWithoutProvinceResponse{
+                ID:   city.ID,
+                Name: city.Name,
+            })
+        }
+        
+        provinceList = append(provinceList, dto.ProvinceResponseWithCity{
+            ID:     province.ID,
+            Name:   province.Name,
+            Cities: citiesInProvince,
+        })
+    }
+    
     response := gin.H{
         "data": employee,
-        "references": gin.H{}, // Fill with reference data if needed
+        "references": gin.H{
+            "job_positions": jobPositionList,
+            "divisions":     divisionList,
+            "cities":        cityList,
+            "provinces":     provinceList,
+        },
     }
     c.JSON(http.StatusOK, response)
+}
+
+// GetAddEmployeePage returns job positions, divisions, and provinces with cities for the add employee page
+func (h *EmployeeManagementHandler) GetAddEmployeePage(c *gin.Context) {
+    // Fetch job positions for reference
+    jobPositions, err := h.usecase.GetJobPositions(1, 1000, "")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    var jobPositionList []dto.JobPositionResponse
+    for _, jp := range jobPositions {
+        jobPositionList = append(jobPositionList, dto.JobPositionResponse{
+            ID:   jp.ID,
+            Name: jp.Name,
+            CreatedAt: jp.CreatedAt.Format("02-01-2006 15:04:05"),
+            UpdatedAt: jp.UpdatedAt.Format("02-01-2006 15:04:05"),
+        })
+    }
+    
+    // Fetch divisions for reference
+    divisions, err := h.usecase.GetDivisions(1, 1000, "")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    var divisionList []dto.DivisionResponse
+    for _, division := range divisions {
+        divisionList = append(divisionList, dto.DivisionResponse{
+            ID:   division.ID,
+            Name: division.Name,
+            CreatedAt: division.CreatedAt.Format("02-01-2006 15:04:05"),
+            UpdatedAt: division.UpdatedAt.Format("02-01-2006 15:04:05"),
+        })
+    }
+    
+    // Fetch provinces with cities for reference
+    provinces, err := h.usecase.GetProvinces(1, 1000, "")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    var provinceList []dto.ProvinceResponseWithCity
+    for _, province := range provinces {
+        var citiesInProvince []dto.CityWithoutProvinceResponse
+        for _, city := range province.Cities {
+            citiesInProvince = append(citiesInProvince, dto.CityWithoutProvinceResponse{
+                ID:   city.ID,
+                Name: city.Name,
+            })
+        }
+        
+        provinceList = append(provinceList, dto.ProvinceResponseWithCity{
+            ID:     province.ID,
+            Name:   province.Name,
+            Cities: citiesInProvince,
+        })
+    }
+    
+    // Fetch users for reference (for employee without user creation)
+    users, err := h.usecase.GetUsers(1, 1000, "")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    var userList []dto.UserResponse
+    for _, user := range users {
+        var roleNames []string
+        for _, role := range user.Role {
+            roleNames = append(roleNames, role.Name)
+        }
+        
+        userList = append(userList, dto.UserResponse{
+            ID:       user.ID,
+            Name:     user.Name,
+            Username: user.Username,
+            Email:    user.Email,
+            Roles:    roleNames,
+        })
+    }
+
+    response := gin.H{
+        "references": gin.H{
+            "job_positions": jobPositionList,
+            "divisions":     divisionList,
+            "provinces":     provinceList,
+            "users":         userList,
+        },
+    }
+    c.JSON(http.StatusOK, response)
+}
+
+// CreateEmployeeWithUser creates a new user and assigns them as an employee
+func (h *EmployeeManagementHandler) CreateEmployeeWithUser(c *gin.Context) {
+    var input dto.CreateEmployeeWithUserInput
+    
+    if err := c.ShouldBindJSON(&input); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    
+    // Create user entity
+    user := entity.User{
+        Username:        input.Username,
+        Password:        input.Password,
+        Name:            input.Name,
+        Email:           input.Email,
+        Telp:            input.Telp,
+        PhotoProfileURL: input.PhotoProfileURL,
+        Status:          "active", // Default status for new users
+    }
+    
+    // Create employee entity
+    employee := entity.Employee{
+        JobPositionID:     input.JobPositionID,
+        DivisionID:        input.DivisionID,
+        CityID:            input.CityID,
+        NIP:               input.NIP,
+        NIK:               input.NIK,
+        BPJSEmploymentNo:  input.BPJSEmploymentNo,
+        BPJSHealthNo:      input.BPJSHealthNo,
+        Address:           input.Address,
+        Phone:             input.Phone,
+        JoinDate:          input.JoinDate,
+        KTPStatus:         input.KTPStatus,
+        ContractNo:        input.ContractNo,
+        NPWPStatus:        input.NPWPStatus,
+        ContractStatus:    input.ContractStatus,
+        Status:            input.Status,
+    }
+    
+    if err := h.usecase.CreateEmployeeWithUser(&user, &employee, input.RoleIDs); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    // Create a combined response
+    response := gin.H{
+        "message": "user and employee created successfully",
+        "data": gin.H{
+            "user": gin.H{
+                "id":        user.ID,
+                "username":  user.Username,
+                "name":      user.Name,
+                "email":     user.Email,
+            },
+            "employee": gin.H{
+                "id":        employee.ID,
+                "user_id":   employee.UserID,
+                "nip":       employee.NIP,
+                "nik":       employee.NIK,
+            },
+        },
+    }
+    
+    c.JSON(http.StatusCreated, response)
 }

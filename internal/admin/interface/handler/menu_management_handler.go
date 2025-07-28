@@ -84,9 +84,23 @@ func (h *MenuManagementHandler) GetMenus(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	// Prepare response data
+	responseData := make([]dto.MenuResponse, 0, len(menus))
+	for _, menu := range menus {
+		responseData = append(responseData, dto.MenuResponse{
+			ID:       menu.ID,
+			Name:     menu.Name,
+			URL:      menu.URL,
+			Icon:     menu.Icon,
+			Order:    menu.Order,
+			ParentID: menu.ParentID,
+			CreatedAt: menu.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: menu.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
 
 	response := gin.H{
-		"data": menus,
+		"data": responseData,
 		"pagination": gin.H{
 			"page":        page,
 			"limit":       limit,

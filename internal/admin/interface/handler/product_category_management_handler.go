@@ -77,8 +77,8 @@ func (h *ProductCategoryManagementHandler) GetProductCategories(c *gin.Context) 
 		responseData = append(responseData, dto.ProductCategoryResponse{
 			ID: category.ID,
 			Name: category.Name,
-			CreatedAt: category.CreatedAt.Format("02-01-2006 15:04"),
-			UpdatedAt: category.UpdatedAt.Format("02-01-2006 15:04"),
+			CreatedAt: category.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: category.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 	response := gin.H{

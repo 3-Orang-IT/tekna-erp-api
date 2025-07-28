@@ -88,6 +88,8 @@ func (h *CityManagementHandler) GetCities(c *gin.Context) {
 			ID:       city.ID,
 			Name:     city.Name,
 			Province: city.Province.Name,
+			CreatedAt: city.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: city.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 

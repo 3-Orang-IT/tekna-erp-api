@@ -141,6 +141,8 @@ func (h *ProductManagementHandler) GetProducts(c *gin.Context) {
 			ProductType:       product.ProductType,
 			ProductFocus:      product.ProductFocus,
 			Brand:             product.Brand,
+			CreatedAt:         product.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:         product.UpdatedAt.Format("2006-01-02 15:04:05"),	
 		})
 	}
 	c.JSON(http.StatusOK, gin.H{

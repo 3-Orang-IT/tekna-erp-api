@@ -21,6 +21,8 @@ type ToDoTemplateResponse struct {
 	Activity      string `json:"activity"`
 	Priority      int    `json:"priority"`
 	OrderNumber   int    `json:"order_number"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
 }
 
 type JobPositionOption struct {

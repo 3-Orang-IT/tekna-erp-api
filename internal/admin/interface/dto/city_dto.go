@@ -11,9 +11,11 @@ type UpdateCityInput struct {
 }
 
 type CityResponse struct {
-	ID       uint            `json:"id"`
-	Name     string          `json:"name"`
-	Province string          `json:"province"`
+	ID        uint   `json:"id"`
+	Name      string `json:"name"`
+	Province  string `json:"province"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type CityWithoutProvinceResponse struct {
