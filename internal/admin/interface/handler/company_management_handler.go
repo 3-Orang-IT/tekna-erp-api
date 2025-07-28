@@ -250,24 +250,23 @@ func (h *CompanyManagementHandler) GetAddCompanyPage(c *gin.Context) {
 	}
 
 	// Transform the data to the desired response structure
-	var provincesWithCities []gin.H
+	var provincesWithCities []dto.ProvinceResponseWithCity
 	for _, province := range provinces {
 		// Create a province object with cities
-		provinceObj := gin.H{
-			"id":   province.ID,
-			"name": province.Name,
+		provinceObj := dto.ProvinceResponseWithCity{
+			ID:   province.ID,
+			Name: province.Name,
 		}
 		
 		// Get cities for this province
-		var citiesList []gin.H
+		var citiesList []dto.CityResponse
 		for _, city := range province.Cities {
-			citiesList = append(citiesList, gin.H{
-				"id":   city.ID,
-				"name": city.Name,
+			citiesList = append(citiesList, dto.CityResponse{
+				ID:   city.ID,
+				Name: city.Name,
 			})
 		}
-		
-		provinceObj["cities"] = citiesList
+		provinceObj.Cities = citiesList
 		provincesWithCities = append(provincesWithCities, provinceObj)
 	}
 
@@ -276,4 +275,5 @@ func (h *CompanyManagementHandler) GetAddCompanyPage(c *gin.Context) {
 			"provinces": provincesWithCities,
 		},
 	})
+		
 }
