@@ -38,6 +38,7 @@ func (h *EmployeeManagementHandler) CreateEmployee(c *gin.Context) {
     }
 
     employee := entity.Employee{
+        UserID:           input.UserID,
         JobPositionID:     input.JobPositionID,
         DivisionID:        input.DivisionID,
         CityID:            input.CityID,
