@@ -1,6 +1,7 @@
 package dto
 
 type CreateEmployeeInput struct {
+	UserID           uint   `json:"user_id" binding:"required"`
 	JobPositionID    uint   `json:"job_position_id" binding:"required"`
 	DivisionID       uint   `json:"division_id" binding:"required"`
 	CityID           uint   `json:"city_id" binding:"required"`
@@ -29,7 +30,7 @@ type CreateEmployeeWithUserInput struct {
 	Telp            string `json:"telp"`
 	PhotoProfileURL string `json:"photo_profile_url"`
 	RoleIDs         []uint `json:"roles" binding:"required"`
-
+	
 	// Employee data
 	JobPositionID    uint   `json:"job_position_id" binding:"required"`
 	DivisionID       uint   `json:"division_id" binding:"required"`
