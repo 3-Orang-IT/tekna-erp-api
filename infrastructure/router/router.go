@@ -91,6 +91,10 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	// Bank Account Management
 	bankAccountManagementRepo := adminRepositoryImpl.NewBankAccountManagementRepository(db)
 	bankAccountManagementUsecase := adminUsecase.NewBankAccountManagementUsecase(bankAccountManagementRepo)
+	
+	// To Do Template Management
+	toDoTemplateManagementRepo := adminRepositoryImpl.NewToDoTemplateManagementRepository(db)
+	toDoTemplateManagementUsecase := adminUsecase.NewToDoTemplateManagementUsecase(toDoTemplateManagementRepo)
 
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
@@ -112,6 +116,7 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewCustomerManagementHandler(r, customerManagementUsecase, db)
 	adminHandler.NewChartOfAccountManagementHandler(r, chartOfAccountManagementUsecase, db)
 	adminHandler.NewBankAccountManagementHandler(r, bankAccountManagementUsecase, db)
+	adminHandler.NewToDoTemplateManagementHandler(r, toDoTemplateManagementUsecase, db)
 
 	// Serve static files for uploaded profile images
 	r.Static("/uploads/profile", "./uploads/profile")
