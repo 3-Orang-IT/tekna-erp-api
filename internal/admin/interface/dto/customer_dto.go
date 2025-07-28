@@ -62,4 +62,6 @@ type CustomerResponse struct {
 	Type        string `json:"type"`
 	Level       string `json:"level"`
 	Status      string `json:"status"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
 }

@@ -66,6 +66,17 @@ func (h *ChartOfAccountManagementHandler) GetChartOfAccounts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	var responseData []dto.ChartOfAccountResponse
+	for _, account := range chartOfAccounts {
+		responseData = append(responseData, dto.ChartOfAccountResponse{
+			ID:        account.ID,
+			Type:      account.Type,
+			Name:      account.Name,
+			Code:      account.Code,
+			CreatedAt: account.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: account.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
 
 	// Get total count for pagination
 	totalData, err := h.usecase.GetChartOfAccountsCount(search)
@@ -81,7 +92,7 @@ func (h *ChartOfAccountManagementHandler) GetChartOfAccounts(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": chartOfAccounts, 
+		"data": responseData,
 		"pagination": gin.H{
 			"page": page, 
 			"limit": limit,

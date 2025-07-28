@@ -82,8 +82,20 @@ func (h *UnitOfMeasureManagementHandler) GetUnitOfMeasures(c *gin.Context) {
 		return
 	}
 
+	var responseData []dto.UnitOfMeasureResponse
+	for _, unitOfMeasure := range unitOfMeasures {
+		responseData = append(responseData, dto.UnitOfMeasureResponse{
+			ID:           unitOfMeasure.ID,
+			Name:         unitOfMeasure.Name,
+			Abbreviation: unitOfMeasure.Abbreviation,
+			CreatedAt:    unitOfMeasure.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:    unitOfMeasure.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+
 	response := gin.H{
-		"data": unitOfMeasures,
+		"data": responseData,
 		"pagination": gin.H{
 			"page":        page,
 			"limit":       limit,

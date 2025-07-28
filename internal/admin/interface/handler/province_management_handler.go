@@ -79,6 +79,15 @@ func (h *ProvinceManagementHandler) GetProvinces(c *gin.Context) {
 			   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			   return
 	   }
+	   var responseData []dto.ProvinceResponse
+	   for _, province := range provinces {
+		   responseData = append(responseData, dto.ProvinceResponse{
+			   ID:   province.ID,
+			   Name: province.Name,
+			   CreatedAt: province.CreatedAt.Format("2006-01-02 15:04:05"),
+			   UpdatedAt: province.UpdatedAt.Format("2006-01-02 15:04:05"),
+		   })
+	   }
 
 	   // Get total count for pagination
 	   totalData, err := h.usecase.GetProvincesCount(search)
@@ -94,7 +103,7 @@ func (h *ProvinceManagementHandler) GetProvinces(c *gin.Context) {
 	   }
 
 	   response := gin.H{
-			   "data": provinces,
+			   "data": responseData,
 			   "pagination": gin.H{
 					   "page":        page,
 					   "limit":       limit,

@@ -87,8 +87,19 @@ func (h *RoleManagementHandler) GetRoles(c *gin.Context) {
 		return
 	}
 
+	var responseData []dto.RoleResponse
+	for _, role := range roles {
+		responseData = append(responseData, dto.RoleResponse{
+			ID:   role.ID,
+			Name: role.Name,
+			Menus: role.Menus,
+			CreatedAt: role.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: role.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
 	response := gin.H{
-		"data": roles,
+		"data": responseData,
 		"pagination": gin.H{
 			"page":        page,
 			"limit":       limit,

@@ -54,4 +54,6 @@ type ProductResponse struct {
 	ProductType         string  `json:"product_type"`
 	ProductFocus        string  `json:"product_focus"`
 	Brand               string  `json:"brand"`
+	CreatedAt        string  `json:"created_at"`
+	UpdatedAt        string  `json:"updated_at"`
 }

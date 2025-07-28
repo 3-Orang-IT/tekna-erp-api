@@ -53,5 +53,6 @@ type SupplierResponse struct {
 	BankAccount   string `json:"bank_account"`
 	Type          string `json:"type"`
 	LogoFilename  string `json:"logo_filename"`
+	CreatedAt     string `json:"created_at"`
 	UpdatedAt     string `json:"updated_at"`
 }

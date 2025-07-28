@@ -117,6 +117,8 @@ func (h *CustomerManagementHandler) GetCustomers(c *gin.Context) {
 			Type:        customer.Type,
 			Level:       customer.Level,
 			Status:      customer.Status,
+			CreatedAt:   customer.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:   customer.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 

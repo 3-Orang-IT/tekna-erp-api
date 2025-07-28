@@ -81,8 +81,19 @@ func (h *DivisionManagementHandler) GetDivisions(c *gin.Context) {
 		return
 	}
 
+	// Format the response data
+	var responseData []dto.DivisionResponse
+	for _, division := range divisions {
+		responseData = append(responseData, dto.DivisionResponse{
+			ID:        division.ID,
+			Name:      division.Name,
+			CreatedAt: division.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: division.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"data": divisions, 
+		"data": responseData,
 		"pagination": gin.H{
 			"page": page, 
 			"limit": limit,

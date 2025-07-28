@@ -59,5 +59,6 @@ type EmployeeResponse struct {
 	ContractStatus   string   `json:"contract_status"`
 	Status           string   `json:"status"`
 	Area             []string `json:"area"` // Area names
+	CreatedAt        string   `json:"created_at"`
 	UpdatedAt        string   `json:"updated_at"`
 }

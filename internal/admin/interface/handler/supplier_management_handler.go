@@ -116,7 +116,8 @@ func (h *SupplierManagementHandler) GetSuppliers(c *gin.Context) {
 			BankAccount:   supplier.BankAccount,
 			Type:          supplier.Type,
 			LogoFilename:  supplier.LogoFilename,
-			UpdatedAt:     supplier.UpdatedAt.Format("02-01-2006 15:04:05"), // Add if you have UpdatedAt field in entity.Supplier
+			CreatedAt:     supplier.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:     supplier.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 

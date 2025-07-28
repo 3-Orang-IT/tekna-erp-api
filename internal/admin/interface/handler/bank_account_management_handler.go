@@ -100,7 +100,8 @@ func (h *BankAccountManagementHandler) GetBankAccounts(c *gin.Context) {
 			Province:         bankAccount.City.Province.Name,
 			PhoneNumber:      bankAccount.PhoneNumber,
 			Priority:         bankAccount.Priority,
-			UpdatedAt:        "", // We will update this if needed
+			CreatedAt:        bankAccount.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:        bankAccount.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 
@@ -139,7 +140,8 @@ func (h *BankAccountManagementHandler) GetBankAccountByID(c *gin.Context) {
 		Province:         bankAccount.City.Province.Name,
 		PhoneNumber:      bankAccount.PhoneNumber,
 		Priority:         bankAccount.Priority,
-		UpdatedAt:        "", // We will update this if needed
+		CreatedAt:        bankAccount.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:        bankAccount.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": response})

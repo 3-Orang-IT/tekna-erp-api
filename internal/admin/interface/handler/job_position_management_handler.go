@@ -105,8 +105,8 @@ func (h *JobPositionManagementHandler) GetJobPositions(c *gin.Context) {
 			   responseData = append(responseData, dto.JobPositionResponse{
 					   ID:   jp.ID,
 					   Name: jp.Name,
-					   CreatedAt: jp.CreatedAt.Format("02-01-2006 15:04"),
-					   UpdatedAt: jp.UpdatedAt.Format("02-01-2006 15:04"),
+					   CreatedAt: jp.CreatedAt.Format("2006-01-02 15:04:05"),
+					   UpdatedAt: jp.UpdatedAt.Format("2006-01-02 15:04:05"),
 			   })
 	   }
 

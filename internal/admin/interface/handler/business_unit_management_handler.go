@@ -80,9 +80,18 @@ func (h *BusinessUnitManagementHandler) GetBusinessUnits(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	var responseData []dto.BusinessUnitResponse
+	for _, unit := range businessUnits {
+		responseData = append(responseData, dto.BusinessUnitResponse{
+			ID:        unit.ID,
+			Name:      unit.Name,
+			CreatedAt: unit.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: unit.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
 
 	response := gin.H{
-		"data": businessUnits,
+		"data": responseData,
 		"pagination": gin.H{
 			"page":        page,
 			"limit":       limit,

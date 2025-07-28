@@ -11,8 +11,10 @@ type UpdateChartOfAccountInput struct {
 }
 
 type ChartOfAccountResponse struct {
-	ID   uint   `json:"id"`
-	Type string `json:"type"`
-	Code string `json:"code"`
-	Name string `json:"name"`
+	ID        uint   `json:"id"`
+	Type      string `json:"type"`
+	Code      string `json:"code"`
+	Name      string `json:"name"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }

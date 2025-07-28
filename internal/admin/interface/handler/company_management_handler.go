@@ -111,7 +111,8 @@ func (h *CompanyManagementHandler) GetCompanies(c *gin.Context) {
 			Longitude:        company.Longitude,
 			TotalShares:      company.TotalShares,
 			AnnualLeaveQuota: company.AnnualLeaveQuota,
-			UpdatedAt:        company.UpdatedAt.Format("02-01-2006 15:04"),
+			CreatedAt:        company.CreatedAt.Format("02-01-2006 15:04:05"),
+			UpdatedAt:        company.UpdatedAt.Format("02-01-2006 15:04:05"),
 		})
 	}
 
@@ -151,7 +152,8 @@ func (h *CompanyManagementHandler) GetCompanyByID(c *gin.Context) {
 		Longitude:        company.Longitude,
 		TotalShares:      company.TotalShares,
 		AnnualLeaveQuota: company.AnnualLeaveQuota,
-		UpdatedAt:        company.UpdatedAt.Format("02-01-2006 15:04"),
+		CreatedAt:        company.CreatedAt.Format("02-01-2006 15:04:05"),
+		UpdatedAt:        company.UpdatedAt.Format("02-01-2006 15:04:05"),
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": response})

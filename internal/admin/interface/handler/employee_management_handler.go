@@ -113,7 +113,8 @@ func (h *EmployeeManagementHandler) GetEmployees(c *gin.Context) {
             KTPStatus:         employee.KTPStatus,
             ContractNo:        employee.ContractNo,
             NPWPStatus:        employee.NPWPStatus,
-            UpdatedAt:         "", // Fill if you have UpdatedAt field
+            CreatedAt:         employee.CreatedAt.Format("2006-01-02 15:04:05"),
+            UpdatedAt:         employee.UpdatedAt.Format("2006-01-02 15:04:05"),
         })
     }
 

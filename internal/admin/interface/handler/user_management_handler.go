@@ -192,8 +192,8 @@ func (h *UserManagementHandler) GetUsers(c *gin.Context) {
 			PhotoProfileURL: photoURL,
 			Status:          user.Status,
 			Roles:           roleNames,
-			CreatedAt:       user.CreatedAt,
-			UpdatedAt:       user.UpdatedAt,
+			CreatedAt:       user.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:       user.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 
@@ -242,8 +242,8 @@ func (h *UserManagementHandler) GetUserByID(c *gin.Context) {
 		PhotoProfileURL: photoURL,
 		Status:          user.Status,
 		Roles:           roleNames,
-		CreatedAt:       user.CreatedAt,
-		UpdatedAt:       user.UpdatedAt,
+		CreatedAt:       user.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:       user.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": userResponse})

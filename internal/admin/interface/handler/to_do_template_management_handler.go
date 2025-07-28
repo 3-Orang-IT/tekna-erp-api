@@ -281,6 +281,8 @@ func (h *ToDoTemplateManagementHandler) GetToDoTemplatesByJobPosition(c *gin.Con
 				Activity:      template.Activity,
 				Priority:      template.Priority,
 				OrderNumber:   template.OrderNumber,
+				CreatedAt:     template.CreatedAt.Format("2006-01-02 15:04:05"),
+				UpdatedAt:     template.UpdatedAt.Format("2006-01-02 15:04:05"),
 			})
 		}
 		
