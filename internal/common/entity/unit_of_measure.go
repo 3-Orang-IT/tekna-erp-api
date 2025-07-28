@@ -1,7 +1,11 @@
 package entity
 
+import "time"
+
 type UnitOfMeasure struct {
-	ID           uint   `gorm:"primaryKey" json:"id"`
-	Name         string `gorm:"size:100;not null" json:"name"`
-	Abbreviation string `gorm:"size:50;not null" json:"abbreviation"`
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	Name         string    `gorm:"size:100;not null" json:"name"`
+	Abbreviation string    `gorm:"size:50;not null" json:"abbreviation"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
