@@ -12,6 +12,8 @@ type UserManagementUsecase interface {
 	UpdateUser(id string, user *entity.User) error
 	DeleteUser(id string) error
 	GetAllRoles() ([]entity.Role, error)
+	// Method to get total count of users for pagination
+	GetUsersCount(search string) (int64, error)
 }
 
 type userManagementUsecase struct {
@@ -44,4 +46,9 @@ func (u *userManagementUsecase) DeleteUser(id string) error {
 
 func (u *userManagementUsecase) GetAllRoles() ([]entity.Role, error) {
 	return u.repo.GetAllRoles()
+}
+
+// GetUsersCount gets the total count of users for pagination
+func (u *userManagementUsecase) GetUsersCount(search string) (int64, error) {
+	return u.repo.GetUsersCount(search)
 }

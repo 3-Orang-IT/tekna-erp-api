@@ -9,5 +9,7 @@ type UserManagementRepository interface {
 	UpdateUser(id string, user *entity.User) error
 	DeleteUser(id string) error
 	GetAllRoles() ([]entity.Role, error)
+	// Method to get total count of users for pagination
+	GetUsersCount(search string) (int64, error)
 }
 
