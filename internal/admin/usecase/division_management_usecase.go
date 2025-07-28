@@ -11,6 +11,8 @@ type DivisionManagementUsecase interface {
 	GetDivisionByID(id string) (*entity.Division, error)
 	UpdateDivision(id string, division *entity.Division) error
 	DeleteDivision(id string) error
+	// Method to get total count of divisions for pagination
+	GetDivisionsCount(search string) (int64, error)
 }
 
 type divisionManagementUsecase struct {
@@ -43,4 +45,9 @@ func (u *divisionManagementUsecase) UpdateDivision(id string, division *entity.D
 
 func (u *divisionManagementUsecase) DeleteDivision(id string) error {
 	return u.repo.DeleteDivision(id)
+}
+
+// GetDivisionsCount gets the total count of divisions for pagination
+func (u *divisionManagementUsecase) GetDivisionsCount(search string) (int64, error) {
+	return u.repo.GetDivisionsCount(search)
 }

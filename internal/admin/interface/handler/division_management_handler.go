@@ -61,13 +61,35 @@ func (h *DivisionManagementHandler) GetDivisions(c *gin.Context) {
 	}
 
 	search := c.DefaultQuery("search", "")
+	
+	// Get total count of divisions for pagination
+	total, err := h.usecase.GetDivisionsCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+	
 	divisions, err := h.usecase.GetDivisions(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": divisions, "page": page, "limit": limit})
+	c.JSON(http.StatusOK, gin.H{
+		"data": divisions, 
+		"pagination": gin.H{
+			"page": page, 
+			"limit": limit,
+			"total_data": total,
+			"totalPages": totalPages,
+		},
+	})
 }
 
 func (h *DivisionManagementHandler) GetDivisionByID(c *gin.Context) {
