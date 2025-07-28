@@ -12,4 +12,6 @@ type CompanyManagementRepository interface {
 	GetCities(page, limit int, search string) ([]entity.City, error)
 	// Method to fetch provinces with their cities for the add page
 	GetProvinces(page, limit int, search string) ([]entity.Province, error)
+	// Method to get total count of companies for pagination
+	GetCompaniesCount(search string) (int64, error)
 }

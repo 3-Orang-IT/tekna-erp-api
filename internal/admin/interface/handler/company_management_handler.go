@@ -74,6 +74,19 @@ func (h *CompanyManagementHandler) GetCompanies(c *gin.Context) {
 
 	search := c.DefaultQuery("search", "")
 
+	// Get total count of companies for pagination
+	total, err := h.usecase.GetCompaniesCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+
 	companies, err := h.usecase.GetCompanies(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -105,8 +118,10 @@ func (h *CompanyManagementHandler) GetCompanies(c *gin.Context) {
 	response := gin.H{
 		"data": responseData,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
+			"page":       page,
+			"limit":      limit,
+			"total_data": total,
+			"totalPages": totalPages,
 		},
 	}
 

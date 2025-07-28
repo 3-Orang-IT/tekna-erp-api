@@ -87,3 +87,16 @@ func (r *companyManagementRepo) GetProvinces(page, limit int, search string) ([]
 	}
 	return provinces, nil
 }
+
+// Method to get total count of companies for pagination
+func (r *companyManagementRepo) GetCompaniesCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.Company{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
