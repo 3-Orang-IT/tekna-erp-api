@@ -68,3 +68,16 @@ func (r *roleManagementRepo) GetAllMenus(menus *[]entity.Menu) error {
 	}
 	return nil
 }
+
+// Method to get total count of roles for pagination
+func (r *roleManagementRepo) GetRolesCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.Role{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}

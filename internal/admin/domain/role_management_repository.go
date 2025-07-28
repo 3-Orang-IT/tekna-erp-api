@@ -9,4 +9,5 @@ type RoleManagementRepository interface {
 	UpdateRole(id string, role *entity.Role) error
 	DeleteRole(id string) error
 	GetAllMenus(menus *[]entity.Menu) error
+	GetRolesCount(search string) (int64, error) // Method to get total count of roles for pagination
 }
