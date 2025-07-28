@@ -11,6 +11,8 @@ type EmployeeManagementUsecase interface {
     GetEmployeeByID(id string) (*entity.Employee, error)
     UpdateEmployee(id string, employee *entity.Employee) error
     DeleteEmployee(id string) error
+    // Method to get total count of employees for pagination
+    GetEmployeesCount(search string) (int64, error)
 }
 
 type employeeManagementUsecase struct {
@@ -39,4 +41,9 @@ func (u *employeeManagementUsecase) UpdateEmployee(id string, employee *entity.E
 
 func (u *employeeManagementUsecase) DeleteEmployee(id string) error {
     return u.repo.DeleteEmployee(id)
+}
+
+// GetEmployeesCount gets the total count of employees for pagination
+func (u *employeeManagementUsecase) GetEmployeesCount(search string) (int64, error) {
+    return u.repo.GetEmployeesCount(search)
 }

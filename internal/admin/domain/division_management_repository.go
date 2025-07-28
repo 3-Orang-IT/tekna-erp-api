@@ -8,4 +8,6 @@ type DivisionManagementRepository interface {
 	GetDivisionByID(id string) (*entity.Division, error)
 	UpdateDivision(id string, division *entity.Division) error
 	DeleteDivision(id string) error
+	// Method to get total count of divisions for pagination
+	GetDivisionsCount(search string) (int64, error)
 }

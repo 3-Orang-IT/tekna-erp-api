@@ -8,5 +8,7 @@ type EmployeeManagementRepository interface {
     GetEmployeeByID(id string) (*entity.Employee, error)
     UpdateEmployee(id string, employee *entity.Employee) error
     DeleteEmployee(id string) error
+    // Method to get total count of employees for pagination
+    GetEmployeesCount(search string) (int64, error)
     // For edit page references, fetch all needed related data if necessary
 }

@@ -7,10 +7,12 @@ import (
 
 type JobPositionManagementUsecase interface {
 	CreateJobPosition(jobPosition *entity.JobPosition) error
-GetJobPositions(page, limit int, search string) ([]entity.JobPosition, error)
+	GetJobPositions(page, limit int, search string) ([]entity.JobPosition, error)
 	GetJobPositionByID(id string) (*entity.JobPosition, error)
 	UpdateJobPosition(id string, jobPosition *entity.JobPosition) error
 	DeleteJobPosition(id string) error
+	// Method to get total count of job positions for pagination
+	GetJobPositionsCount(search string) (int64, error)
 }
 
 type jobPositionManagementUsecase struct {
@@ -39,4 +41,9 @@ func (u *jobPositionManagementUsecase) UpdateJobPosition(id string, jobPosition 
 
 func (u *jobPositionManagementUsecase) DeleteJobPosition(id string) error {
 	return u.repo.DeleteJobPosition(id)
+}
+
+// GetJobPositionsCount gets the total count of job positions for pagination
+func (u *jobPositionManagementUsecase) GetJobPositionsCount(search string) (int64, error) {
+	return u.repo.GetJobPositionsCount(search)
 }

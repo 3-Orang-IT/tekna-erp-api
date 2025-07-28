@@ -222,9 +222,9 @@ func (h *CompanyManagementHandler) GetEditCompanyPage(c *gin.Context) {
 		return
 	}
 
-	var cityList []dto.CityResponse
+	var cityList []dto.CityWithoutProvinceResponse
 	for _, city := range cities {
-		cityList = append(cityList, dto.CityResponse{
+		cityList = append(cityList, dto.CityWithoutProvinceResponse{
 			ID:   city.ID,
 			Name: city.Name,
 		})

@@ -59,3 +59,16 @@ func (r *divisionManagementRepo) DeleteDivision(id string) error {
 	}
 	return r.db.Delete(&division).Error
 }
+
+// Method to get total count of divisions for pagination
+func (r *divisionManagementRepo) GetDivisionsCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.Division{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
