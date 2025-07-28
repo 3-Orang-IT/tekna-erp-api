@@ -11,6 +11,7 @@ type UnitOfMeasureManagementUsecase interface {
 	GetUnitOfMeasureByID(id string) (*entity.UnitOfMeasure, error)
 	UpdateUnitOfMeasure(id string, unitOfMeasure *entity.UnitOfMeasure) error
 	DeleteUnitOfMeasure(id string) error
+	GetUnitOfMeasuresCount(search string) (int64, error) // Method to get total count of units of measure for pagination
 }
 
 type unitOfMeasureManagementUsecase struct {
@@ -39,4 +40,9 @@ func (u *unitOfMeasureManagementUsecase) UpdateUnitOfMeasure(id string, unitOfMe
 
 func (u *unitOfMeasureManagementUsecase) DeleteUnitOfMeasure(id string) error {
 	return u.repo.DeleteUnitOfMeasure(id)
+}
+
+// GetUnitOfMeasuresCount gets the total count of units of measure for pagination
+func (u *unitOfMeasureManagementUsecase) GetUnitOfMeasuresCount(search string) (int64, error) {
+	return u.repo.GetUnitOfMeasuresCount(search)
 }

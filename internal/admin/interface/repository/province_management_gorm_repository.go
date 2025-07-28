@@ -33,6 +33,18 @@ func (r *provinceManagementRepo) GetProvinces(page, limit int, search string) ([
 	   return provinces, nil
 }
 
+func (r *provinceManagementRepo) GetProvincesCount(search string) (int64, error) {
+	   var count int64
+	   query := r.db.Model(&entity.Province{})
+	   if search != "" {
+			   query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	   }
+	   if err := query.Count(&count).Error; err != nil {
+			   return 0, err
+	   }
+	   return count, nil
+}
+
 func (r *provinceManagementRepo) GetProvinceByID(id string) (*entity.Province, error) {
 	var province entity.Province
 	if err := r.db.First(&province, "id = ?", id).Error; err != nil {

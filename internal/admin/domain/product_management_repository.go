@@ -13,4 +13,5 @@ type ProductManagementRepository interface {
 	GetBusinessUnits() ([]entity.BusinessUnit, error)
 	GetUnits() ([]entity.UnitOfMeasure, error)
 	GetLastProduct() (*entity.Product, error)
+	GetProductsCount(search string) (int64, error) // Method to get total count of products for pagination
 }

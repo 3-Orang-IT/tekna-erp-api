@@ -84,6 +84,19 @@ func (h *CustomerManagementHandler) GetCustomers(c *gin.Context) {
 
 	search := c.DefaultQuery("search", "")
 
+	// Get total count of customers for pagination
+	total, err := h.usecase.GetCustomersCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+
 	customers, err := h.usecase.GetCustomers(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -107,7 +120,15 @@ func (h *CustomerManagementHandler) GetCustomers(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": responseData, "pagination": gin.H{"page": page, "limit": limit}})
+	c.JSON(http.StatusOK, gin.H{
+		"data": responseData, 
+		"pagination": gin.H{
+			"page":        page, 
+			"limit":       limit,
+			"total_data":  total,
+			"total_pages": totalPages,
+		},
+	})
 }
 
 func (h *CustomerManagementHandler) GetCustomerByID(c *gin.Context) {

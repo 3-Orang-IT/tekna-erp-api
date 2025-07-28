@@ -77,6 +77,19 @@ func (h *SupplierManagementHandler) GetSuppliers(c *gin.Context) {
 
 	search := c.DefaultQuery("search", "")
 
+	// Get total count of suppliers for pagination
+	total, err := h.usecase.GetSuppliersCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+
 	suppliers, err := h.usecase.GetSuppliers(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -110,8 +123,10 @@ func (h *SupplierManagementHandler) GetSuppliers(c *gin.Context) {
 	response := gin.H{
 		"data": responseData,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
+			"page":        page,
+			"limit":       limit,
+			"total_data":  total,
+			"total_pages": totalPages,
 		},
 	}
 

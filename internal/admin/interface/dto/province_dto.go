@@ -16,5 +16,5 @@ type ProvinceResponse struct {
 type ProvinceResponseWithCity struct {
 	ID      uint            `json:"id"`
 	Name    string          `json:"name"`
-	Cities  []CityResponse `json:"cities"`
+	Cities  []CityWithoutProvinceResponse `json:"cities"`
 }

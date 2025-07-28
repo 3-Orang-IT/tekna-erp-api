@@ -16,6 +16,7 @@ type ProductManagementUsecase interface {
 	GetBusinessUnits() ([]entity.BusinessUnit, error)
 	GetUnits() ([]entity.UnitOfMeasure, error)
 	GetLastProduct() (*entity.Product, error)
+	GetProductsCount(search string) (int64, error) // Method to get total count of products for pagination
 }
 
 type productManagementUsecase struct {
@@ -64,4 +65,9 @@ func (u *productManagementUsecase) GetUnits() ([]entity.UnitOfMeasure, error) {
 
 func (u *productManagementUsecase) GetLastProduct() (*entity.Product, error) {
 	return u.repo.GetLastProduct()
+}
+
+// GetProductsCount gets the total count of products for pagination
+func (u *productManagementUsecase) GetProductsCount(search string) (int64, error) {
+	return u.repo.GetProductsCount(search)
 }

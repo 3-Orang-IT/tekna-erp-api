@@ -11,6 +11,7 @@ type BusinessUnitManagementUsecase interface {
 	GetBusinessUnitByID(id string) (*entity.BusinessUnit, error)
 	UpdateBusinessUnit(id string, businessUnit *entity.BusinessUnit) error
 	DeleteBusinessUnit(id string) error
+	GetBusinessUnitsCount(search string) (int64, error) // Method to get total count of business units for pagination
 }
 
 type businessUnitManagementUsecase struct {
@@ -39,4 +40,9 @@ func (u *businessUnitManagementUsecase) UpdateBusinessUnit(id string, businessUn
 
 func (u *businessUnitManagementUsecase) DeleteBusinessUnit(id string) error {
 	return u.repo.DeleteBusinessUnit(id)
+}
+
+// GetBusinessUnitsCount gets the total count of business units for pagination
+func (u *businessUnitManagementUsecase) GetBusinessUnitsCount(search string) (int64, error) {
+	return u.repo.GetBusinessUnitsCount(search)
 }

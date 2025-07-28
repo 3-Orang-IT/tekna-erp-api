@@ -8,6 +8,7 @@ import (
 type ChartOfAccountManagementUsecase interface {
 	CreateChartOfAccount(chartOfAccount *entity.ChartOfAccount) error
 	GetChartOfAccounts(page, limit int, search string) ([]entity.ChartOfAccount, error)
+	GetChartOfAccountsCount(search string) (int64, error)
 	GetChartOfAccountByID(id string) (*entity.ChartOfAccount, error)
 	UpdateChartOfAccount(id string, chartOfAccount *entity.ChartOfAccount) error
 	DeleteChartOfAccount(id string) error
@@ -27,6 +28,10 @@ func (u *chartOfAccountManagementUsecase) CreateChartOfAccount(chartOfAccount *e
 
 func (u *chartOfAccountManagementUsecase) GetChartOfAccounts(page, limit int, search string) ([]entity.ChartOfAccount, error) {
 	return u.repo.GetChartOfAccounts(page, limit, search)
+}
+
+func (u *chartOfAccountManagementUsecase) GetChartOfAccountsCount(search string) (int64, error) {
+	return u.repo.GetChartOfAccountsCount(search)
 }
 
 func (u *chartOfAccountManagementUsecase) GetChartOfAccountByID(id string) (*entity.ChartOfAccount, error) {

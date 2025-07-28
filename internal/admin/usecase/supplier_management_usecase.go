@@ -11,6 +11,7 @@ type SupplierManagementUsecase interface {
 	GetSupplierByID(id string) (*entity.Supplier, error)
 	UpdateSupplier(id string, supplier *entity.Supplier) error
 	DeleteSupplier(id string) error
+	GetSuppliersCount(search string) (int64, error) // Method to get total count of suppliers for pagination
 }
 
 type supplierManagementUsecase struct {
@@ -39,4 +40,9 @@ func (u *supplierManagementUsecase) UpdateSupplier(id string, supplier *entity.S
 
 func (u *supplierManagementUsecase) DeleteSupplier(id string) error {
 	return u.repo.DeleteSupplier(id)
+}
+
+// GetSuppliersCount gets the total count of suppliers for pagination
+func (u *supplierManagementUsecase) GetSuppliersCount(search string) (int64, error) {
+	return u.repo.GetSuppliersCount(search)
 }

@@ -8,6 +8,7 @@ import (
 type CityManagementUsecase interface {
 	CreateCity(city *entity.City) error
 	GetCities(page, limit int, search string) ([]entity.City, error) // Added search parameter
+	GetCitiesCount(search string) (int64, error) // Added count method for pagination
 	GetCityByID(id string) (*entity.City, error)
 	UpdateCity(id string, city *entity.City) error
 	DeleteCity(id string) error
@@ -28,6 +29,10 @@ func (u *cityManagementUsecase) CreateCity(city *entity.City) error {
 
 func (u *cityManagementUsecase) GetCities(page, limit int, search string) ([]entity.City, error) {
 	return u.repo.GetCities(page, limit, search)
+}
+
+func (u *cityManagementUsecase) GetCitiesCount(search string) (int64, error) {
+	return u.repo.GetCitiesCount(search)
 }
 
 func (u *cityManagementUsecase) GetCityByID(id string) (*entity.City, error) {

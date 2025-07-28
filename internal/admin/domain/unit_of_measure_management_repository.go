@@ -8,4 +8,5 @@ type UnitOfMeasureManagementRepository interface {
 	GetUnitOfMeasureByID(id string) (*entity.UnitOfMeasure, error)
 	UpdateUnitOfMeasure(id string, unitOfMeasure *entity.UnitOfMeasure) error
 	DeleteUnitOfMeasure(id string) error
+	GetUnitOfMeasuresCount(search string) (int64, error) // Method to get total count of units of measure for pagination
 }

@@ -12,6 +12,7 @@ type CustomerManagementUsecase interface {
 	UpdateCustomer(id string, customer *entity.Customer) error
 	DeleteCustomer(id string) error
 	GetCities(page, limit int, search string) ([]entity.City, error) // For edit page reference
+	GetCustomersCount(search string) (int64, error) // Method to get total count of customers for pagination
 }
 
 type customerManagementUsecase struct {
@@ -44,4 +45,9 @@ func (u *customerManagementUsecase) DeleteCustomer(id string) error {
 
 func (u *customerManagementUsecase) GetCities(page, limit int, search string) ([]entity.City, error) {
 	return u.repo.GetCities(page, limit, search)
+}
+
+// GetCustomersCount gets the total count of customers for pagination
+func (u *customerManagementUsecase) GetCustomersCount(search string) (int64, error) {
+	return u.repo.GetCustomersCount(search)
 }

@@ -8,4 +8,5 @@ type ProductCategoryManagementRepository interface {
 	GetProductCategoryByID(id string) (*entity.ProductCategory, error)
 	UpdateProductCategory(id string, category *entity.ProductCategory) error
 	DeleteProductCategory(id string) error
+	GetProductCategoriesCount(search string) (int64, error) // Method to get total count of product categories for pagination
 }

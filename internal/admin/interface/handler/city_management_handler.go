@@ -69,6 +69,19 @@ func (h *CityManagementHandler) GetCities(c *gin.Context) {
 		return
 	}
 
+	// Get total count for pagination
+	totalData, err := h.usecase.GetCitiesCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(totalData) / limit
+	if int(totalData)%limit > 0 {
+		totalPages++
+	}
+
 	var responseData []dto.CityResponse
 	for _, city := range cities {
 		responseData = append(responseData, dto.CityResponse{
@@ -81,8 +94,10 @@ func (h *CityManagementHandler) GetCities(c *gin.Context) {
 	response := gin.H{
 		"data": responseData,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
+			"page":        page,
+			"limit":       limit,
+			"total_data":  totalData,
+			"total_pages": totalPages,
 		},
 	}
 

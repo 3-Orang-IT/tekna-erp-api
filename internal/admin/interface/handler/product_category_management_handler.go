@@ -53,6 +53,20 @@ func (h *ProductCategoryManagementHandler) GetProductCategories(c *gin.Context) 
 		return
 	}
 	search := c.DefaultQuery("search", "")
+	
+	// Get total count of product categories for pagination
+	total, err := h.usecase.GetProductCategoriesCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+	
 	categories, err := h.usecase.GetProductCategories(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -70,8 +84,10 @@ func (h *ProductCategoryManagementHandler) GetProductCategories(c *gin.Context) 
 	response := gin.H{
 		"data": responseData,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
+			"page":        page,
+			"limit":       limit,
+			"total_data":  total,
+			"total_pages": totalPages,
 		},
 	}
 	c.JSON(http.StatusOK, response)

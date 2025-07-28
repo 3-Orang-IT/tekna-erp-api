@@ -74,6 +74,19 @@ func (h *BankAccountManagementHandler) GetBankAccounts(c *gin.Context) {
 		return
 	}
 
+	// Get total count for pagination
+	totalData, err := h.usecase.GetBankAccountsCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(totalData) / limit
+	if int(totalData)%limit > 0 {
+		totalPages++
+	}
+
 	// Map bank accounts to response format
 	var responseData []dto.BankAccountResponse
 	for _, bankAccount := range bankAccounts {
@@ -94,8 +107,10 @@ func (h *BankAccountManagementHandler) GetBankAccounts(c *gin.Context) {
 	response := gin.H{
 		"data": responseData,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
+			"page":        page,
+			"limit":       limit,
+			"total_data":  totalData,
+			"total_pages": totalPages,
 		},
 	}
 

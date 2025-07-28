@@ -59,3 +59,16 @@ func (r *businessUnitManagementRepo) DeleteBusinessUnit(id string) error {
 	}
 	return r.db.Delete(&businessUnit).Error
 }
+
+// Method to get total count of business units for pagination
+func (r *businessUnitManagementRepo) GetBusinessUnitsCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.BusinessUnit{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}

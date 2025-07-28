@@ -80,12 +80,26 @@ func (h *ProvinceManagementHandler) GetProvinces(c *gin.Context) {
 			   return
 	   }
 
+	   // Get total count for pagination
+	   totalData, err := h.usecase.GetProvincesCount(search)
+	   if err != nil {
+			   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			   return
+	   }
+
+	   // Calculate total pages
+	   totalPages := int(totalData) / limit
+	   if int(totalData)%limit > 0 {
+			   totalPages++
+	   }
+
 	   response := gin.H{
 			   "data": provinces,
 			   "pagination": gin.H{
-					   "page":  page,
-					   "limit": limit,
-					   "search": search,
+					   "page":        page,
+					   "limit":       limit,
+					   "total_data":  totalData,
+					   "total_pages": totalPages,
 			   },
 	   }
 
