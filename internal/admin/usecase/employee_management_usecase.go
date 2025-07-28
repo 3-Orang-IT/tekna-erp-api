@@ -13,6 +13,11 @@ type EmployeeManagementUsecase interface {
     DeleteEmployee(id string) error
     // Method to get total count of employees for pagination
     GetEmployeesCount(search string) (int64, error)
+    // Methods for fetching reference data for edit page
+    GetJobPositions(page, limit int, search string) ([]entity.JobPosition, error)
+    GetDivisions(page, limit int, search string) ([]entity.Division, error)
+    GetCities(page, limit int, search string) ([]entity.City, error)
+    GetProvinces(page, limit int, search string) ([]entity.Province, error)
 }
 
 type employeeManagementUsecase struct {
@@ -46,4 +51,24 @@ func (u *employeeManagementUsecase) DeleteEmployee(id string) error {
 // GetEmployeesCount gets the total count of employees for pagination
 func (u *employeeManagementUsecase) GetEmployeesCount(search string) (int64, error) {
     return u.repo.GetEmployeesCount(search)
+}
+
+// GetJobPositions fetches job positions for the edit page
+func (u *employeeManagementUsecase) GetJobPositions(page, limit int, search string) ([]entity.JobPosition, error) {
+    return u.repo.GetJobPositions(page, limit, search)
+}
+
+// GetDivisions fetches divisions for the edit page
+func (u *employeeManagementUsecase) GetDivisions(page, limit int, search string) ([]entity.Division, error) {
+    return u.repo.GetDivisions(page, limit, search)
+}
+
+// GetCities fetches cities for the edit page
+func (u *employeeManagementUsecase) GetCities(page, limit int, search string) ([]entity.City, error) {
+    return u.repo.GetCities(page, limit, search)
+}
+
+// GetProvinces fetches provinces with their cities for the edit page
+func (u *employeeManagementUsecase) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
+    return u.repo.GetProvinces(page, limit, search)
 }

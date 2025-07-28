@@ -23,9 +23,9 @@ type Employee struct {
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 
-	User        User        `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;"`
-	JobPosition JobPosition `gorm:"foreignKey:JobPositionID;constraint:OnDelete:SET NULL;"`
-	Division    Division    `gorm:"foreignKey:DivisionID;constraint:OnDelete:SET NULL;"`
-	City        City        `gorm:"foreignKey:CityID;constraint:OnDelete:SET NULL;"`
-	Area        []Area      `gorm:"many2many:employee_areas;constraint:OnDelete:CASCADE;"`
+	User        User        `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE;" json:"user"`
+	JobPosition JobPosition `gorm:"foreignKey:JobPositionID;constraint:OnDelete:SET NULL;" json:"job_position"`
+	Division    Division    `gorm:"foreignKey:DivisionID;constraint:OnDelete:SET NULL;" json:"division"`
+	City        City        `gorm:"foreignKey:CityID;constraint:OnDelete:SET NULL;" json:"city"`
+	Area        []Area      `gorm:"many2many:employee_areas;constraint:OnDelete:CASCADE;" json:"area"`
 }

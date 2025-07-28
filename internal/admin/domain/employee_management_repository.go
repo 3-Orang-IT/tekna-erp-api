@@ -10,5 +10,9 @@ type EmployeeManagementRepository interface {
     DeleteEmployee(id string) error
     // Method to get total count of employees for pagination
     GetEmployeesCount(search string) (int64, error)
-    // For edit page references, fetch all needed related data if necessary
+    // Methods for fetching reference data for edit page
+    GetJobPositions(page, limit int, search string) ([]entity.JobPosition, error)
+    GetDivisions(page, limit int, search string) ([]entity.Division, error)
+    GetCities(page, limit int, search string) ([]entity.City, error)
+    GetProvinces(page, limit int, search string) ([]entity.Province, error)
 }
