@@ -8,6 +8,8 @@ type CompanyManagementRepository interface {
 	GetCompanyByID(id string) (*entity.Company, error)
 	UpdateCompany(id string, company *entity.Company) error
 	DeleteCompany(id string) error
-	// Add a method to fetch cities for the edit page
+	// Method to fetch cities for the edit page
 	GetCities(page, limit int, search string) ([]entity.City, error)
+	// Method to fetch provinces with their cities for the add page
+	GetProvinces(page, limit int, search string) ([]entity.Province, error)
 }

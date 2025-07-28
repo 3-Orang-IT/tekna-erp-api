@@ -60,7 +60,7 @@ func (r *companyManagementRepo) DeleteCompany(id string) error {
 	return r.db.Delete(&company).Error
 }
 
-// Add a method to fetch cities for the edit page
+// Method to fetch cities for the edit page
 func (r *companyManagementRepo) GetCities(page, limit int, search string) ([]entity.City, error) {
 	var cities []entity.City
 	offset := (page - 1) * limit
@@ -72,4 +72,18 @@ func (r *companyManagementRepo) GetCities(page, limit int, search string) ([]ent
 		return nil, err
 	}
 	return cities, nil
+}
+
+// Method to fetch provinces with their cities for the add page
+func (r *companyManagementRepo) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
+	var provinces []entity.Province
+	offset := (page - 1) * limit
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(provinces.name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Preload("Cities").Limit(limit).Offset(offset).Find(&provinces).Error; err != nil {
+		return nil, err
+	}
+	return provinces, nil
 }
