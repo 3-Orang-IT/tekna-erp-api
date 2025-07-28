@@ -29,7 +29,7 @@ type CreateEmployeeWithUserInput struct {
 	Telp            string `json:"telp"`
 	PhotoProfileURL string `json:"photo_profile_url"`
 	RoleIDs         []uint `json:"roles" binding:"required"`
-	
+
 	// Employee data
 	JobPositionID    uint   `json:"job_position_id" binding:"required"`
 	DivisionID       uint   `json:"division_id" binding:"required"`
