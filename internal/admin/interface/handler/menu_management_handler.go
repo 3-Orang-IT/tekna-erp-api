@@ -66,6 +66,19 @@ func (h *MenuManagementHandler) GetMenus(c *gin.Context) {
 
 	search := c.DefaultQuery("search", "") // Added search query parameter
 
+	// Get total count of menus for pagination
+	total, err := h.usecase.GetMenusCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+
 	menus, err := h.usecase.GetMenus(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -75,8 +88,10 @@ func (h *MenuManagementHandler) GetMenus(c *gin.Context) {
 	response := gin.H{
 		"data": menus,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
+			"page":        page,
+			"limit":       limit,
+			"total_data":  total,
+			"total_pages": totalPages,
 		},
 	}
 

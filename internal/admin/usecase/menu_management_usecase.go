@@ -11,6 +11,7 @@ type MenuManagementUsecase interface {
 	GetMenuByID(id string) (*entity.Menu, error)
 	UpdateMenu(id string, menu *entity.Menu) error
 	DeleteMenu(id string) error
+	GetMenusCount(search string) (int64, error) // Method to get total count of menus for pagination
 }
 
 type menuManagementUsecase struct {
@@ -39,4 +40,9 @@ func (u *menuManagementUsecase) UpdateMenu(id string, menu *entity.Menu) error {
 
 func (u *menuManagementUsecase) DeleteMenu(id string) error {
 	return u.repo.DeleteMenu(id)
+}
+
+// GetMenusCount gets the total count of menus for pagination
+func (u *menuManagementUsecase) GetMenusCount(search string) (int64, error) {
+	return u.repo.GetMenusCount(search)
 }
