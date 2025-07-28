@@ -35,6 +35,19 @@ func (r *bankAccountManagementRepo) GetBankAccounts(page, limit int, search stri
 	return bankAccounts, nil
 }
 
+func (r *bankAccountManagementRepo) GetBankAccountsCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.BankAccount{})
+	if search != "" {
+		query = query.Where("LOWER(bank_name) LIKE ? OR account_number LIKE ?", 
+			"%"+strings.ToLower(search)+"%", "%"+search+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (r *bankAccountManagementRepo) GetBankAccountByID(id string) (*entity.BankAccount, error) {
 	var bankAccount entity.BankAccount
 	if err := r.db.Preload("City.Province").Preload("City").Preload("ChartOfAccount").

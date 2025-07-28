@@ -8,4 +8,5 @@ type MenuManagementRepository interface {
 	GetMenuByID(id string) (*entity.Menu, error)
 	UpdateMenu(id string, menu *entity.Menu) error
 	DeleteMenu(id string) error
+	GetMenusCount(search string) (int64, error) // Method to get total count of menus for pagination
 }

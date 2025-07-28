@@ -59,3 +59,16 @@ func (r *unitOfMeasureManagementRepo) DeleteUnitOfMeasure(id string) error {
 	}
 	return r.db.Delete(&unitOfMeasure).Error
 }
+
+// Method to get total count of units of measure for pagination
+func (r *unitOfMeasureManagementRepo) GetUnitOfMeasuresCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.UnitOfMeasure{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}

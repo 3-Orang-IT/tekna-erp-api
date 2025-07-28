@@ -8,4 +8,5 @@ type BusinessUnitManagementRepository interface {
 	GetBusinessUnitByID(id string) (*entity.BusinessUnit, error)
 	UpdateBusinessUnit(id string, businessUnit *entity.BusinessUnit) error
 	DeleteBusinessUnit(id string) error
+	GetBusinessUnitsCount(search string) (int64, error) // Method to get total count of business units for pagination
 }

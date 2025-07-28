@@ -202,8 +202,8 @@ func (h *UserManagementHandler) GetUsers(c *gin.Context) {
 		"pagination": gin.H{
 			"page":       page,
 			"limit":      limit,
-			"total_data":      total,
-			"totalPages": totalPages,
+			"total_data": total,
+			"total_pages": totalPages,
 		},
 	}
 

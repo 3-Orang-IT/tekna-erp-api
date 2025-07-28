@@ -33,6 +33,18 @@ func (r *toDoTemplateManagementRepo) GetToDoTemplates(page, limit int, search st
 	return toDoTemplates, nil
 }
 
+func (r *toDoTemplateManagementRepo) GetToDoTemplatesCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.ToDoTemplate{})
+	if search != "" {
+		query = query.Where("LOWER(activity) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (r *toDoTemplateManagementRepo) GetToDoTemplatesByJobPosition(page, limit int, search string) (map[uint][]entity.ToDoTemplate, int64, error) {
 	var toDoTemplates []entity.ToDoTemplate
 	var total int64

@@ -103,3 +103,16 @@ func (r *productManagementRepo) GetLastProduct() (*entity.Product, error) {
 	}
 	return &product, nil
 }
+
+// Method to get total count of products for pagination
+func (r *productManagementRepo) GetProductsCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.Product{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}

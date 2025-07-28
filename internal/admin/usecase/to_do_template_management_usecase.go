@@ -8,6 +8,7 @@ import (
 type ToDoTemplateManagementUsecase interface {
 	CreateToDoTemplate(toDoTemplate *entity.ToDoTemplate) error
 	GetToDoTemplates(page, limit int, search string) ([]entity.ToDoTemplate, error)
+	GetToDoTemplatesCount(search string) (int64, error)
 	GetToDoTemplatesByJobPosition(page, limit int, search string) (map[uint][]entity.ToDoTemplate, int64, error)
 	GetToDoTemplateByID(id string) (*entity.ToDoTemplate, error)
 	GetToDoTemplatesByJobPositionID(jobPositionID uint) ([]entity.ToDoTemplate, error)
@@ -30,6 +31,10 @@ func (u *toDoTemplateManagementUsecase) CreateToDoTemplate(toDoTemplate *entity.
 
 func (u *toDoTemplateManagementUsecase) GetToDoTemplates(page, limit int, search string) ([]entity.ToDoTemplate, error) {
 	return u.repo.GetToDoTemplates(page, limit, search)
+}
+
+func (u *toDoTemplateManagementUsecase) GetToDoTemplatesCount(search string) (int64, error) {
+	return u.repo.GetToDoTemplatesCount(search)
 }
 
 func (u *toDoTemplateManagementUsecase) GetToDoTemplatesByJobPosition(page, limit int, search string) (map[uint][]entity.ToDoTemplate, int64, error) {

@@ -11,6 +11,7 @@ type ProductCategoryManagementUsecase interface {
 	GetProductCategoryByID(id string) (*entity.ProductCategory, error)
 	UpdateProductCategory(id string, category *entity.ProductCategory) error
 	DeleteProductCategory(id string) error
+	GetProductCategoriesCount(search string) (int64, error) // Method to get total count of product categories for pagination
 }
 
 type productCategoryManagementUsecase struct {
@@ -39,4 +40,9 @@ func (u *productCategoryManagementUsecase) UpdateProductCategory(id string, cate
 
 func (u *productCategoryManagementUsecase) DeleteProductCategory(id string) error {
 	return u.repo.DeleteProductCategory(id)
+}
+
+// GetProductCategoriesCount gets the total count of product categories for pagination
+func (u *productCategoryManagementUsecase) GetProductCategoriesCount(search string) (int64, error) {
+	return u.repo.GetProductCategoriesCount(search)
 }

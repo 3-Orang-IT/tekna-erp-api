@@ -33,6 +33,18 @@ func (r *cityManagementRepo) GetCities(page, limit int, search string) ([]entity
 	return cities, nil
 }
 
+func (r *cityManagementRepo) GetCitiesCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.City{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (r *cityManagementRepo) GetCityByID(id string) (*entity.City, error) {
 	var city entity.City
 	if err := r.db.Preload("Province").First(&city, "id = ?", id).Error; err != nil {

@@ -8,6 +8,7 @@ import (
 type BankAccountManagementUsecase interface {
 	CreateBankAccount(bankAccount *entity.BankAccount) error
 	GetBankAccounts(page, limit int, search string) ([]entity.BankAccount, error)
+	GetBankAccountsCount(search string) (int64, error)
 	GetBankAccountByID(id string) (*entity.BankAccount, error)
 	UpdateBankAccount(id string, bankAccount *entity.BankAccount) error
 	DeleteBankAccount(id string) error
@@ -29,6 +30,10 @@ func (u *bankAccountManagementUsecase) CreateBankAccount(bankAccount *entity.Ban
 
 func (u *bankAccountManagementUsecase) GetBankAccounts(page, limit int, search string) ([]entity.BankAccount, error) {
 	return u.repo.GetBankAccounts(page, limit, search)
+}
+
+func (u *bankAccountManagementUsecase) GetBankAccountsCount(search string) (int64, error) {
+	return u.repo.GetBankAccountsCount(search)
 }
 
 func (u *bankAccountManagementUsecase) GetBankAccountByID(id string) (*entity.BankAccount, error) {

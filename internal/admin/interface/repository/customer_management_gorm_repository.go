@@ -81,3 +81,16 @@ func (r *customerManagementRepo) GetCities(page, limit int, search string) ([]en
 	}
 	return cities, nil
 }
+
+// Method to get total count of customers for pagination
+func (r *customerManagementRepo) GetCustomersCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.Customer{})
+	if search != "" {
+		query = query.Where("LOWER(invoice_name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}

@@ -116,7 +116,7 @@ func (h *JobPositionManagementHandler) GetJobPositions(c *gin.Context) {
 					   "page":       page,
 					   "limit":      limit,
 					   "total_data":      total,
-					   "totalPages": totalPages,
+					   "total_pages": totalPages,
 			   },
 	   }
 

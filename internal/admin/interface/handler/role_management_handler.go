@@ -68,6 +68,19 @@ func (h *RoleManagementHandler) GetRoles(c *gin.Context) {
 
 	search := c.DefaultQuery("search", "")
 
+	// Get total count of roles for pagination
+	total, err := h.usecase.GetRolesCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+
 	roles, err := h.usecase.GetRoles(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -77,8 +90,10 @@ func (h *RoleManagementHandler) GetRoles(c *gin.Context) {
 	response := gin.H{
 		"data": roles,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
+			"page":        page,
+			"limit":       limit,
+			"total_data":  total,
+			"total_pages": totalPages,
 		},
 	}
 

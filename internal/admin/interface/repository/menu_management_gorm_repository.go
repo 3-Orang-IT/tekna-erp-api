@@ -61,3 +61,16 @@ func (r *menuManagementRepo) DeleteMenu(id string) error {
 	}
 	return r.db.Delete(&menu).Error
 }
+
+// Method to get total count of menus for pagination
+func (r *menuManagementRepo) GetMenusCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.Menu{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}

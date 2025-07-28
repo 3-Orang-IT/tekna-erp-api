@@ -12,6 +12,7 @@ type RoleManagementUsecase interface {
 	UpdateRole(id string, role *entity.Role) error
 	DeleteRole(id string) error
 	GetAllMenus(menus *[]entity.Menu) error
+	GetRolesCount(search string) (int64, error) // Method to get total count of roles for pagination
 }
 
 type roleManagementUsecase struct {
@@ -44,4 +45,9 @@ func (u *roleManagementUsecase) DeleteRole(id string) error {
 
 func (u *roleManagementUsecase) GetAllMenus(menus *[]entity.Menu) error {
 	return u.repo.GetAllMenus(menus)
+}
+
+// GetRolesCount gets the total count of roles for pagination
+func (u *roleManagementUsecase) GetRolesCount(search string) (int64, error) {
+	return u.repo.GetRolesCount(search)
 }

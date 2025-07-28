@@ -63,6 +63,19 @@ func (h *UnitOfMeasureManagementHandler) GetUnitOfMeasures(c *gin.Context) {
 
 	search := c.DefaultQuery("search", "")
 
+	// Get total count of units of measure for pagination
+	total, err := h.usecase.GetUnitOfMeasuresCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+
 	unitOfMeasures, err := h.usecase.GetUnitOfMeasures(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -72,8 +85,10 @@ func (h *UnitOfMeasureManagementHandler) GetUnitOfMeasures(c *gin.Context) {
 	response := gin.H{
 		"data": unitOfMeasures,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
+			"page":        page,
+			"limit":       limit,
+			"total_data":  total,
+			"total_pages": totalPages,
 		},
 	}
 

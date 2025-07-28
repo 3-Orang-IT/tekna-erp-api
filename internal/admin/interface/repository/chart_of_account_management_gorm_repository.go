@@ -50,6 +50,18 @@ func (r *chartOfAccountManagementRepo) GetChartOfAccounts(page, limit int, searc
 	return chartOfAccounts, nil
 }
 
+func (r *chartOfAccountManagementRepo) GetChartOfAccountsCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.ChartOfAccount{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (r *chartOfAccountManagementRepo) GetChartOfAccountByID(id string) (*entity.ChartOfAccount, error) {
 	var chartOfAccount entity.ChartOfAccount
 	if err := r.db.First(&chartOfAccount, "id = ?", id).Error; err != nil {

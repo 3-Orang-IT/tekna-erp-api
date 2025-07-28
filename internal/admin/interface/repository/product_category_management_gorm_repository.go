@@ -59,3 +59,16 @@ func (r *productCategoryManagementRepo) DeleteProductCategory(id string) error {
 	}
 	return r.db.Delete(&category).Error
 }
+
+// Method to get total count of product categories for pagination
+func (r *productCategoryManagementRepo) GetProductCategoriesCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.ProductCategory{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}

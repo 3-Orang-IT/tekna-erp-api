@@ -101,6 +101,20 @@ func (h *ProductManagementHandler) GetProducts(c *gin.Context) {
 		return
 	}
 	search := c.DefaultQuery("search", "")
+	
+	// Get total count of products for pagination
+	total, err := h.usecase.GetProductsCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+	
 	products, err := h.usecase.GetProducts(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -129,7 +143,15 @@ func (h *ProductManagementHandler) GetProducts(c *gin.Context) {
 			Brand:             product.Brand,
 		})
 	}
-	c.JSON(http.StatusOK, gin.H{"data": responseData, "pagination": gin.H{"page": page, "limit": limit}})
+	c.JSON(http.StatusOK, gin.H{
+		"data": responseData, 
+		"pagination": gin.H{
+			"page":        page, 
+			"limit":       limit,
+			"total_data":  total,
+			"total_pages": totalPages,
+		},
+	})
 }
 
 func (h *ProductManagementHandler) GetProductByID(c *gin.Context) {

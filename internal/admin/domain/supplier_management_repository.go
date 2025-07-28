@@ -8,4 +8,5 @@ type SupplierManagementRepository interface {
 	GetSupplierByID(id string) (*entity.Supplier, error)
 	UpdateSupplier(id string, supplier *entity.Supplier) error
 	DeleteSupplier(id string) error
+	GetSuppliersCount(search string) (int64, error) // Method to get total count of suppliers for pagination
 }

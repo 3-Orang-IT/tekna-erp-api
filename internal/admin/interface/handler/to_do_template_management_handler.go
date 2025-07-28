@@ -69,6 +69,20 @@ func (h *ToDoTemplateManagementHandler) GetToDoTemplates(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	
+	// Get total count for pagination
+	totalData, err := h.usecase.GetToDoTemplatesCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(totalData) / limit
+	if int(totalData)%limit > 0 {
+		totalPages++
+	}
+	
 	var response []dto.ToDoTemplateResponse
 	for _, template := range toDoTemplates {
 		response = append(response, dto.ToDoTemplateResponse{
@@ -85,6 +99,8 @@ func (h *ToDoTemplateManagementHandler) GetToDoTemplates(c *gin.Context) {
 		"pagination": gin.H{
 			"page":        page,
 			"limit":       limit,
+			"total_data":  totalData,
+			"total_pages": totalPages,
 		},
 	})
 }
@@ -282,7 +298,7 @@ func (h *ToDoTemplateManagementHandler) GetToDoTemplatesByJobPosition(c *gin.Con
 		"pagination": gin.H{
 			"page":        page,
 			"limit":       limit,
-			"total_items": total,
+			"total_data": total,
 			"total_pages": int(math.Ceil(float64(total) / float64(limit))),
 		},
 	})

@@ -274,9 +274,9 @@ func (h *CompanyManagementHandler) GetAddCompanyPage(c *gin.Context) {
 		}
 		
 		// Get cities for this province
-		var citiesList []dto.CityResponse
+		var citiesList []dto.CityWithoutProvinceResponse
 		for _, city := range province.Cities {
-			citiesList = append(citiesList, dto.CityResponse{
+			citiesList = append(citiesList, dto.CityWithoutProvinceResponse{
 				ID:   city.ID,
 				Name: city.Name,
 			})

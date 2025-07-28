@@ -67,7 +67,28 @@ func (h *ChartOfAccountManagementHandler) GetChartOfAccounts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": chartOfAccounts, "pagination": gin.H{"page": page, "limit": limit}})
+	// Get total count for pagination
+	totalData, err := h.usecase.GetChartOfAccountsCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(totalData) / limit
+	if int(totalData)%limit > 0 {
+		totalPages++
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": chartOfAccounts, 
+		"pagination": gin.H{
+			"page": page, 
+			"limit": limit,
+			"total_data": totalData,
+			"total_pages": totalPages,
+		},
+	})
 }
 
 func (h *ChartOfAccountManagementHandler) GetChartOfAccountByID(c *gin.Context) {
