@@ -62,3 +62,19 @@ func (r *employeeManagementRepo) DeleteEmployee(id string) error {
     }
     return r.db.Delete(&employee).Error
 }
+
+// Method to get total count of employees for pagination
+func (r *employeeManagementRepo) GetEmployeesCount(search string) (int64, error) {
+    var count int64
+    query := r.db.Model(&entity.Employee{})
+    if search != "" {
+        // Search by n_ip, n_ik, or user.name
+        searchStr := "%" + strings.ToLower(search) + "%"
+        query = query.Joins("LEFT JOIN users ON users.id = employees.user_id").
+            Where("LOWER(employees.nip) LIKE ? OR LOWER(employees.nik) LIKE ? OR LOWER(users.name) LIKE ?", searchStr, searchStr, searchStr)
+    }
+    if err := query.Count(&count).Error; err != nil {
+        return 0, err
+    }
+    return count, nil
+}
