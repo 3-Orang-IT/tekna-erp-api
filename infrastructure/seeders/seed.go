@@ -113,6 +113,11 @@ func Seed(db *gorm.DB) {
 			return err
 		}
 
+		if err := SeedBudgetCategories(tx); err != nil {
+			log.Printf("Error seeding budget categories: %v", err)
+			return err
+		}
+
 		if err := SeedTravelCosts(tx); err != nil {
 			log.Printf("Error seeding travel costs: %v", err)
 			return err
