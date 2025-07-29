@@ -1,8 +1,13 @@
 package adminHandler
 
 import (
+	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/interface/dto"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/middleware"
@@ -11,6 +16,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+// ensureDir creates a directory if it does not exist
+func ensureDirEmployee(dirName string) error {
+    err := os.MkdirAll(dirName, os.ModePerm)
+    if err != nil && !os.IsExist(err) {
+        return err
+    }
+    return nil
+}
 
 type EmployeeManagementHandler struct {
     usecase adminUsecase.EmployeeManagementUsecase
@@ -38,7 +52,7 @@ func (h *EmployeeManagementHandler) CreateEmployee(c *gin.Context) {
     }
 
     employee := entity.Employee{
-        UserID:           input.UserID,
+        UserID:            input.UserID,
         JobPositionID:     input.JobPositionID,
         DivisionID:        input.DivisionID,
         CityID:            input.CityID,
@@ -135,6 +149,8 @@ func (h *EmployeeManagementHandler) GetEmployees(c *gin.Context) {
         totalPages++
     }
 
+    baseUrl := os.Getenv("BASE_URL")
+
     employees, err := h.usecase.GetEmployees(page, limit, search)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -146,7 +162,8 @@ func (h *EmployeeManagementHandler) GetEmployees(c *gin.Context) {
         responseData = append(responseData, dto.EmployeeResponse{
             ID:                employee.ID,
             UserID:            employee.UserID,
-			Name:              employee.User.Name, // Assuming User entity has a Name field
+			Name:              employee.User.Name,
+            PhotoProfileURL:   baseUrl + employee.User.PhotoProfileURL,
             JobPosition:       employee.JobPosition.Name,
             Division:          employee.Division.Name,
             City:              employee.City.Name,
@@ -448,46 +465,130 @@ func (h *EmployeeManagementHandler) GetAddEmployeePage(c *gin.Context) {
 
 // CreateEmployeeWithUser creates a new user and assigns them as an employee
 func (h *EmployeeManagementHandler) CreateEmployeeWithUser(c *gin.Context) {
-    var input dto.CreateEmployeeWithUserInput
+    // Parse form-data (multipart)
+    if err := c.Request.ParseMultipartForm(10 << 20); err != nil { // 10MB max
+        c.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse multipart form: " + err.Error()})
+        return
+    }
+
+    // Get fields from form-data
+    username := c.PostForm("username")
+    password := c.PostForm("password")
+    name := c.PostForm("name")
+    email := c.PostForm("email")
+    telp := c.PostForm("telp")
     
-    if err := c.ShouldBindJSON(&input); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    // Convert roleIDs from string array to uint array
+    roleIDs := c.PostFormArray("roles")
+    var roleIDsUint []uint
+    for _, rid := range roleIDs {
+        id, err := strconv.ParseUint(rid, 10, 64)
+        if err == nil {
+            roleIDsUint = append(roleIDsUint, uint(id))
+        }
+    }
+
+    // Handle file upload
+    file, header, err := c.Request.FormFile("photo_profile")
+    var photoProfileURL string
+    if err == nil && header != nil {
+        sanitizedFilename := strings.ReplaceAll(header.Filename, " ", "_")
+        filename := fmt.Sprintf("%d_%s", time.Now().UnixNano(), sanitizedFilename)
+        savePath := fmt.Sprintf("uploads/profile/%s", filename)
+        // Ensure directory exists
+        if err := ensureDirEmployee("uploads/profile"); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create upload directory: " + err.Error()})
+            return
+        }
+        out, err := os.Create(savePath)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save file: " + err.Error()})
+            return
+        }
+        defer out.Close()
+        if _, err := io.Copy(out, file); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to write file: " + err.Error()})
+            return
+        }
+        photoProfileURL = savePath
+    }
+
+    // Get employee fields from form
+    jobPositionID, _ := strconv.ParseUint(c.PostForm("job_position_id"), 10, 64)
+    divisionID, _ := strconv.ParseUint(c.PostForm("division_id"), 10, 64)
+    cityID, _ := strconv.ParseUint(c.PostForm("city_id"), 10, 64)
+    nip := c.PostForm("nip")
+    nik := c.PostForm("nik")
+    bpjsEmploymentNo := c.PostForm("bpjs_employment_no")
+    bpjsHealthNo := c.PostForm("bpjs_health_no")
+    address := c.PostForm("address")
+    phone := c.PostForm("phone")
+    joinDate := c.PostForm("join_date")
+    ktpStatus := c.PostForm("ktp_status")
+    contractNo := c.PostForm("contract_no")
+    npwpStatus := c.PostForm("npwp_status")
+    contractStatus := c.PostForm("contract_status")
+    status := c.PostForm("status")
+    
+    // Validate required fields
+    if username == "" || password == "" || name == "" || email == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "username, password, name, and email are required"})
+        return
+    }
+    
+    if jobPositionID == 0 || divisionID == 0 || cityID == 0 {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "job position ID, division ID, and city ID are required"})
         return
     }
     
     // Create user entity
     user := entity.User{
-        Username:        input.Username,
-        Password:        input.Password,
-        Name:            input.Name,
-        Email:           input.Email,
-        Telp:            input.Telp,
-        PhotoProfileURL: input.PhotoProfileURL,
+        Username:        username,
+        Password:        password,
+        Name:            name,
+        Email:           email,
+        Telp:            telp,
+        PhotoProfileURL: photoProfileURL,
         Status:          "active", // Default status for new users
     }
     
     // Create employee entity
     employee := entity.Employee{
-        JobPositionID:     input.JobPositionID,
-        DivisionID:        input.DivisionID,
-        CityID:            input.CityID,
-        NIP:               input.NIP,
-        NIK:               input.NIK,
-        BPJSEmploymentNo:  input.BPJSEmploymentNo,
-        BPJSHealthNo:      input.BPJSHealthNo,
-        Address:           input.Address,
-        Phone:             input.Phone,
-        JoinDate:          input.JoinDate,
-        KTPStatus:         input.KTPStatus,
-        ContractNo:        input.ContractNo,
-        NPWPStatus:        input.NPWPStatus,
-        ContractStatus:    input.ContractStatus,
-        Status:            input.Status,
+        JobPositionID:     uint(jobPositionID),
+        DivisionID:        uint(divisionID),
+        CityID:            uint(cityID),
+        NIP:               nip,
+        NIK:               nik,
+        BPJSEmploymentNo:  bpjsEmploymentNo,
+        BPJSHealthNo:      bpjsHealthNo,
+        Address:           address,
+        Phone:             phone,
+        JoinDate:          joinDate,
+        KTPStatus:         ktpStatus,
+        ContractNo:        contractNo,
+        NPWPStatus:        npwpStatus,
+        ContractStatus:    contractStatus,
+        Status:            status,
     }
     
-    if err := h.usecase.CreateEmployeeWithUser(&user, &employee, input.RoleIDs); err != nil {
+    // Set default values if not provided
+    if employee.Status == "" {
+        employee.Status = "active"
+    }
+    if employee.ContractStatus == "" {
+        employee.ContractStatus = "active"
+    }
+    
+    if err := h.usecase.CreateEmployeeWithUser(&user, &employee, roleIDsUint); err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
+    }
+    
+    // Format photo URL with base URL if provided
+    baseUrl := os.Getenv("BASE_URL")
+    var photoURL string
+    if user.PhotoProfileURL != "" {
+        photoURL = baseUrl + user.PhotoProfileURL
     }
     
     // Create a combined response
@@ -495,16 +596,20 @@ func (h *EmployeeManagementHandler) CreateEmployeeWithUser(c *gin.Context) {
         "message": "user and employee created successfully",
         "data": gin.H{
             "user": gin.H{
-                "id":        user.ID,
-                "username":  user.Username,
-                "name":      user.Name,
-                "email":     user.Email,
+                "id":               user.ID,
+                "username":         user.Username,
+                "name":             user.Name,
+                "email":            user.Email,
+                "photo_profile_url": photoURL,
             },
             "employee": gin.H{
-                "id":        employee.ID,
-                "user_id":   employee.UserID,
-                "nip":       employee.NIP,
-                "nik":       employee.NIK,
+                "id":               employee.ID,
+                "user_id":          employee.UserID,
+                "job_position_id":  employee.JobPositionID,
+                "division_id":      employee.DivisionID,
+                "city_id":          employee.CityID,
+                "nip":              employee.NIP,
+                "nik":              employee.NIK,
             },
         },
     }
