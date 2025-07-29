@@ -16,6 +16,7 @@ type CustomerManagementUsecase interface {
 	GetProvinces(page, limit int, search string) ([]entity.Province, error) // Method for fetching provinces with cities
 	GetAreas(page, limit int, search string) ([]entity.Area, error) // Method for fetching areas
 	GetUsers(page, limit int, search string) ([]entity.User, error) // Method for fetching users
+	GetLastCustomer() (*entity.Customer, error) // For code generation
 }
 
 type customerManagementUsecase struct {
@@ -68,4 +69,8 @@ func (u *customerManagementUsecase) GetAreas(page, limit int, search string) ([]
 // GetUsers fetches users for the customer form
 func (u *customerManagementUsecase) GetUsers(page, limit int, search string) ([]entity.User, error) {
 	return u.repo.GetUsers(page, limit, search)
+}
+
+func (u *customerManagementUsecase) GetLastCustomer() (*entity.Customer, error) {
+	return u.repo.GetLastCustomer()
 }

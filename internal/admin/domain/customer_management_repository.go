@@ -13,4 +13,5 @@ type CustomerManagementRepository interface {
 	GetProvinces(page, limit int, search string) ([]entity.Province, error) // Method for fetching provinces with cities
 	GetAreas(page, limit int, search string) ([]entity.Area, error) // Method for fetching areas
 	GetUsers(page, limit int, search string) ([]entity.User, error) // Method for fetching users
+	GetLastCustomer() (*entity.Customer, error) // For code generation
 }

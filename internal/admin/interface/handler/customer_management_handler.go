@@ -36,12 +36,20 @@ func (h *CustomerManagementHandler) CreateCustomer(c *gin.Context) {
 		return
 	}
 
+	// Generate an auto-incrementing customer code
+	lastCustomer, err := h.usecase.GetLastCustomer()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate customer code"})
+		return
+	}
+	customerCode := "CUST-" + strconv.Itoa(int(lastCustomer.ID)+1)
+
 	customer := entity.Customer{
 		UserID:            input.UserID,
 		AreaID:            input.AreaID,
 		CityID:            input.CityID,
 		Name:              input.Name,
-		Code:              input.Code,
+		Code:              customerCode,
 		InvoiceName:       input.InvoiceName,
 		Address:           input.Address,
 		Phone:             input.Phone,
