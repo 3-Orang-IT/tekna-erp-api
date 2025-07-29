@@ -24,6 +24,7 @@ func NewToDoTemplateManagementHandler(r *gin.Engine, uc adminUsecase.ToDoTemplat
 	admin.POST("/todo-templates", h.CreateToDoTemplate)
 	admin.GET("/todo-templates", h.GetToDoTemplatesByJobPosition)
 	admin.GET("/todo-templates/list", h.GetToDoTemplates)
+	admin.GET("/todo-templates/add", h.GetAddToDoTemplatePage) // New route for add page
 	admin.GET("/todo-templates/:id", h.GetToDoTemplateByID)
 	admin.GET("/todo-templates/:id/edit", h.GetEditToDoTemplatePage)
 	admin.PUT("/todo-templates/:id", h.UpdateToDoTemplate)
@@ -235,6 +236,30 @@ func (h *ToDoTemplateManagementHandler) DeleteToDoTemplate(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "to-do template deleted successfully", "data": gin.H{"id": id}})
+}
+
+// GetAddToDoTemplatePage returns necessary reference data for the add to-do template page
+func (h *ToDoTemplateManagementHandler) GetAddToDoTemplatePage(c *gin.Context) {
+	// Fetch job positions for reference
+	jobPositions, err := h.usecase.GetJobPositions(1, 1000, "")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var jobPositionOptions []dto.JobPositionOption
+	for _, jobPosition := range jobPositions {
+		jobPositionOptions = append(jobPositionOptions, dto.JobPositionOption{
+			ID:   jobPosition.ID,
+			Name: jobPosition.Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"job_positions": jobPositionOptions,
+		},
+	})
 }
 
 func (h *ToDoTemplateManagementHandler) GetToDoTemplatesByJobPosition(c *gin.Context) {

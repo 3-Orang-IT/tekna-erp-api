@@ -27,7 +27,7 @@ func (r *toDoTemplateManagementRepo) GetToDoTemplates(page, limit int, search st
 	if search != "" {
 		query = query.Where("LOWER(activity) LIKE ?", "%"+strings.ToLower(search)+"%")
 	}
-	if err := query.Preload("JobPosition").Limit(limit).Offset(offset).Find(&toDoTemplates).Error; err != nil {
+	if err := query.Preload("JobPosition").Limit(limit).Offset(offset).Order("id ASC").Find(&toDoTemplates).Error; err != nil {
 		return nil, err
 	}
 	return toDoTemplates, nil

@@ -22,6 +22,7 @@ func NewProductManagementHandler(r *gin.Engine, uc adminUsecase.ProductManagemen
 	admin.Use(middleware.AdminRoleMiddleware(db))
 	admin.POST("/products", h.CreateProduct)
 	admin.GET("/products", h.GetProducts)
+	admin.GET("/products/add", h.GetAddProductPage) // New route for add page
 	admin.GET("/products/:id", h.GetProductByID)
 	admin.GET("/products/:id/edit", h.GetEditProductPage)
 	admin.PUT("/products/:id", h.UpdateProduct)
@@ -223,6 +224,46 @@ func (h *ProductManagementHandler) GetEditProductPage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"data": product,
 		"references": gin.H{
+			"product_categories": productCategories,
+			"suppliers": suppliers,
+			"business_units": businessUnits,
+			"units": units,
+		},
+	})
+}
+
+// GetAddProductPage returns necessary reference data for the add product page
+func (h *ProductManagementHandler) GetAddProductPage(c *gin.Context) {
+	// Fetch product categories
+	productCategories, err := h.usecase.GetProductCategories()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch product categories"})
+		return
+	}
+
+	// Fetch suppliers
+	suppliers, err := h.usecase.GetSuppliers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch suppliers"})
+		return
+	}
+
+	// Fetch business units
+	businessUnits, err := h.usecase.GetBusinessUnits()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch business units"})
+		return
+	}
+
+	// Fetch units of measure
+	units, err := h.usecase.GetUnits()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch units"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
 			"product_categories": productCategories,
 			"suppliers": suppliers,
 			"business_units": businessUnits,

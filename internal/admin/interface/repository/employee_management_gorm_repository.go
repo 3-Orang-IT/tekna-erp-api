@@ -30,7 +30,8 @@ func (r *employeeManagementRepo) GetEmployees(page, limit int, search string) ([
         query = query.Joins("LEFT JOIN users ON users.id = employees.user_id").
             Where("LOWER(employees.nip) LIKE ? OR LOWER(employees.nik) LIKE ? OR LOWER(users.name) LIKE ?", searchStr, searchStr, searchStr)
     }
-    if err := query.Preload("User").Preload("JobPosition").Preload("Division").Preload("City").Limit(limit).Offset(offset).Find(&employees).Error; err != nil {
+    if err := query.Preload("User").Preload("JobPosition").Preload("Division").Preload("City").
+		Limit(limit).Offset(offset).Order("id ASC").Find(&employees).Error; err != nil {
         return nil, err
     }
     return employees, nil

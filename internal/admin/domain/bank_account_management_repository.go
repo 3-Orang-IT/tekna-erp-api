@@ -11,4 +11,5 @@ type BankAccountManagementRepository interface {
 	DeleteBankAccount(id string) error
 	GetCities(page, limit int, search string) ([]entity.City, error)
 	GetChartOfAccounts(page, limit int, search string) ([]entity.ChartOfAccount, error)
+	GetProvinces(page, limit int, search string) ([]entity.Province, error) // Method for fetching provinces with cities
 }

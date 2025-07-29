@@ -24,6 +24,7 @@ func NewSupplierManagementHandler(r *gin.Engine, uc adminUsecase.SupplierManagem
 	admin.Use(middleware.AdminRoleMiddleware(db))
 	admin.POST("/suppliers", h.CreateSupplier)
 	admin.GET("/suppliers", h.GetSuppliers)
+	admin.GET("/suppliers/add", h.GetAddSupplierPage) // New route for add page
 	admin.GET("/suppliers/:id", h.GetSupplierByID)
 	admin.PUT("/suppliers/:id", h.UpdateSupplier)
 	admin.DELETE("/suppliers/:id", h.DeleteSupplier)
@@ -250,4 +251,50 @@ func (h *SupplierManagementHandler) GetSupplierEditPage(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": response})
+}
+
+// GetAddSupplierPage returns provinces and cities for the add supplier page
+func (h *SupplierManagementHandler) GetAddSupplierPage(c *gin.Context) {
+	// Fetch list of provinces with their cities
+	provinces, err := h.usecase.GetProvinces(1, 1000, "") // Need to implement this method
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Transform the data to the desired response structure
+	var provincesWithCities []dto.ProvinceResponseWithCity
+	for _, province := range provinces {
+		// Create a province object with cities
+		provinceObj := dto.ProvinceResponseWithCity{
+			ID:   province.ID,
+			Name: province.Name,
+		}
+		
+		// Get cities for this province
+		var citiesList []dto.CityWithoutProvinceResponse
+		for _, city := range province.Cities {
+			citiesList = append(citiesList, dto.CityWithoutProvinceResponse{
+				ID:   city.ID,
+				Name: city.Name,
+			})
+		}
+		provinceObj.Cities = citiesList
+		provincesWithCities = append(provincesWithCities, provinceObj)
+	}
+
+	// Fetch any additional data needed for supplier creation
+	// For example, users list for UserID selection
+	users, err := h.usecase.GetUsers(1, 1000, "") // Need to implement this method
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch users"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"provinces": provincesWithCities,
+			"users": users,
+		},
+	})
 }

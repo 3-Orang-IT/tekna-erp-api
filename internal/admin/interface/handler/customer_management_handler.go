@@ -22,6 +22,7 @@ func NewCustomerManagementHandler(r *gin.Engine, uc adminUsecase.CustomerManagem
 	admin.Use(middleware.AdminRoleMiddleware(db))
 	admin.POST("/customers", h.CreateCustomer)
 	admin.GET("/customers", h.GetCustomers)
+	admin.GET("/customers/add", h.GetAddCustomerPage) // New route for add page
 	admin.GET("/customers/:id", h.GetCustomerByID)
 	admin.GET("/customers/:id/edit", h.GetEditCustomerPage)
 	admin.PUT("/customers/:id", h.UpdateCustomer)
@@ -210,4 +211,57 @@ func (h *CustomerManagementHandler) GetEditCustomerPage(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": customer, "references": gin.H{"cities": cities}})
+}
+
+// GetAddCustomerPage returns necessary reference data for the add customer page
+func (h *CustomerManagementHandler) GetAddCustomerPage(c *gin.Context) {
+	// Fetch list of provinces with their cities
+	provinces, err := h.usecase.GetProvinces(1, 1000, "") 
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Transform the data to the desired response structure
+	var provincesWithCities []dto.ProvinceResponseWithCity
+	for _, province := range provinces {
+		// Create a province object with cities
+		provinceObj := dto.ProvinceResponseWithCity{
+			ID:   province.ID,
+			Name: province.Name,
+		}
+		
+		// Get cities for this province
+		var citiesList []dto.CityWithoutProvinceResponse
+		for _, city := range province.Cities {
+			citiesList = append(citiesList, dto.CityWithoutProvinceResponse{
+				ID:   city.ID,
+				Name: city.Name,
+			})
+		}
+		provinceObj.Cities = citiesList
+		provincesWithCities = append(provincesWithCities, provinceObj)
+	}
+
+	// Fetch areas for reference
+	areas, err := h.usecase.GetAreas(1, 1000, "")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch areas"})
+		return
+	}
+
+	// Fetch users for reference (if needed)
+	users, err := h.usecase.GetUsers(1, 1000, "")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch users"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"provinces": provincesWithCities,
+			"areas": areas,
+			"users": users,
+		},
+	})
 }

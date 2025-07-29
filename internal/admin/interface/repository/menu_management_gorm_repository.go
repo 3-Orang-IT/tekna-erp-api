@@ -23,7 +23,7 @@ func (r *menuManagementRepo) CreateMenu(menu *entity.Menu) error {
 func (r *menuManagementRepo) GetMenus(page, limit int, search string) ([]entity.Menu, error) {
 	var menus []entity.Menu
 	offset := (page - 1) * limit
-	query := r.db.Limit(limit).Offset(offset)
+	query := r.db.Limit(limit).Offset(offset).Order("id ASC")
 
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")

@@ -27,7 +27,7 @@ func (r *productManagementRepo) GetProducts(page, limit int, search string) ([]e
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
 	}
-	if err := query.Preload("ProductCategory").Preload("Supplier").Preload("BusinessUnit").Preload("Unit").Limit(limit).Offset(offset).Find(&products).Error; err != nil {
+	if err := query.Preload("ProductCategory").Preload("Supplier").Preload("BusinessUnit").Preload("Unit").Limit(limit).Offset(offset).Order("id ASC").Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil

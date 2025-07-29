@@ -20,6 +20,7 @@ func NewMenuManagementHandler(r *gin.Engine, uc adminUsecase.MenuManagementUseca
 	h := &MenuManagementHandler{uc}
 	admin := r.Group("/api/v1/admin")
 	admin.Use(middleware.AdminRoleMiddleware(db))
+	admin.GET("/menus/add", h.GetAddMenuPage)
 	admin.POST("/menus", h.CreateMenu)
 	admin.GET("/menus", h.GetMenus)
 	admin.GET("/menus/:id", h.GetMenuByID)
@@ -107,6 +108,21 @@ func (h *MenuManagementHandler) GetMenus(c *gin.Context) {
 			"total_data":  total,
 			"total_pages": totalPages,
 		},
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *MenuManagementHandler) GetAddMenuPage(c *gin.Context) {
+	// Fetch necessary data for the add menu page, e.g., parent menus
+	parentMenus, err := h.usecase.GetMenus(1, 10000, "") // Fetch all menus for parent selection	
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	response := gin.H{
+		"data": parentMenus,
 	}
 
 	c.JSON(http.StatusOK, response)

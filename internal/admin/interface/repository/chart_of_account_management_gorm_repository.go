@@ -44,7 +44,7 @@ func (r *chartOfAccountManagementRepo) GetChartOfAccounts(page, limit int, searc
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
 	}
-	if err := query.Limit(limit).Offset(offset).Find(&chartOfAccounts).Error; err != nil {
+	if err := query.Limit(limit).Offset(offset).Order("id ASC").Find(&chartOfAccounts).Error; err != nil {
 		return nil, err
 	}
 	return chartOfAccounts, nil
