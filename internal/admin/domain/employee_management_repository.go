@@ -16,6 +16,8 @@ type EmployeeManagementRepository interface {
     GetDivisions(page, limit int, search string) ([]entity.Division, error)
     GetCities(page, limit int, search string) ([]entity.City, error)
     GetProvinces(page, limit int, search string) ([]entity.Province, error)
+    // Method to get areas for employee assignment
+    GetAreas(page, limit int, search string) ([]entity.Area, error)
     // Method to get users that can be assigned to employees
     GetUsers(page, limit int, search string) ([]entity.User, error)
 }

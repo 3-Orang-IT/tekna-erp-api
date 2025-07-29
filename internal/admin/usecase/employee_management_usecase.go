@@ -19,6 +19,8 @@ type EmployeeManagementUsecase interface {
     GetDivisions(page, limit int, search string) ([]entity.Division, error)
     GetCities(page, limit int, search string) ([]entity.City, error)
     GetProvinces(page, limit int, search string) ([]entity.Province, error)
+    // Method to get areas for employee assignment
+    GetAreas(page, limit int, search string) ([]entity.Area, error)
     // Method to get users that can be assigned to employees
     GetUsers(page, limit int, search string) ([]entity.User, error)
 }
@@ -84,4 +86,9 @@ func (u *employeeManagementUsecase) CreateEmployeeWithUser(user *entity.User, em
 // GetUsers fetches users that can be assigned to employees
 func (u *employeeManagementUsecase) GetUsers(page, limit int, search string) ([]entity.User, error) {
     return u.repo.GetUsers(page, limit, search)
+}
+
+// GetAreas fetches areas for employee assignment
+func (u *employeeManagementUsecase) GetAreas(page, limit int, search string) ([]entity.Area, error) {
+    return u.repo.GetAreas(page, limit, search)
 }
