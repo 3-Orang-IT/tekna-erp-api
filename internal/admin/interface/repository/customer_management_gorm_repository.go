@@ -32,6 +32,7 @@ func (r *customerManagementRepo) GetCustomers(page, limit int, search string) ([
 		Preload("Area").
 		Limit(limit).
 		Offset(offset).
+		Order("id ASC").
 		Find(&customers).Error; err != nil {
 		return nil, err
 	}

@@ -21,16 +21,16 @@ func (r *jobPositionManagementRepo) CreateJobPosition(jobPosition *entity.JobPos
 }
 
 func (r *jobPositionManagementRepo) GetJobPositions(page, limit int, search string) ([]entity.JobPosition, error) {
-	   var jobPositions []entity.JobPosition
-	   offset := (page - 1) * limit
-	   query := r.db
-	   if search != "" {
-			   query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
-	   }
-	   if err := query.Limit(limit).Offset(offset).Find(&jobPositions).Error; err != nil {
-			   return nil, err
-	   }
-	   return jobPositions, nil
+	var jobPositions []entity.JobPosition
+	offset := (page - 1) * limit
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Limit(limit).Offset(offset).Order("id ASC").Find(&jobPositions).Error; err != nil {
+		return nil, err
+	}
+	return jobPositions, nil
 }
 
 func (r *jobPositionManagementRepo) GetJobPositionByID(id string) (*entity.JobPosition, error) {

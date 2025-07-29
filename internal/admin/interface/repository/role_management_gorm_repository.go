@@ -23,7 +23,7 @@ func (r *roleManagementRepo) CreateRole(role *entity.Role) error {
 func (r *roleManagementRepo) GetRoles(page, limit int, search string) ([]entity.Role, error) {
 	var roles []entity.Role
 	offset := (page - 1) * limit
-	query := r.db.Preload("Menus").Limit(limit).Offset(offset)
+	query := r.db.Preload("Menus").Limit(limit).Offset(offset).Order("id ASC")
 
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")

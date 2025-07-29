@@ -27,7 +27,7 @@ func (r *productCategoryManagementRepo) GetProductCategories(page, limit int, se
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
 	}
-	if err := query.Limit(limit).Offset(offset).Find(&categories).Error; err != nil {
+	if err := query.Limit(limit).Offset(offset).Order("id ASC").Find(&categories).Error; err != nil {
 		return nil, err
 	}
 	return categories, nil

@@ -27,7 +27,7 @@ func (r *userManagementRepo) CreateUser(user *entity.User) error {
 func (r *userManagementRepo) GetUsers(page, limit int, search string) ([]entity.User, error) {
 	var users []entity.User
 	offset := (page - 1) * limit
-	query := r.db.Preload("Role").Limit(limit).Offset(offset)
+	query := r.db.Preload("Role").Limit(limit).Offset(offset).Order("id ASC")
 	if search != "" {
 		query = query.Where("username LIKE ? OR email LIKE ?", "%"+search+"%", "%"+search+"%")
 	}

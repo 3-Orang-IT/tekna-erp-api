@@ -27,7 +27,7 @@ func (r *companyManagementRepo) GetCompanies(page, limit int, search string) ([]
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
 	}
-	if err := query.Preload("City.Province").Preload("City").Limit(limit).Offset(offset).Find(&companies).Error; err != nil {
+	if err := query.Preload("City.Province").Preload("City").Limit(limit).Offset(offset).Order("id ASC").Find(&companies).Error; err != nil {
 		return nil, err
 	}
 	return companies, nil

@@ -27,7 +27,7 @@ func (r *businessUnitManagementRepo) GetBusinessUnits(page, limit int, search st
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
 	}
-	if err := query.Limit(limit).Offset(offset).Find(&businessUnits).Error; err != nil {
+	if err := query.Limit(limit).Offset(offset).Order("id ASC").Find(&businessUnits).Error; err != nil {
 		return nil, err
 	}
 	return businessUnits, nil

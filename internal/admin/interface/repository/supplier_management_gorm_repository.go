@@ -27,7 +27,7 @@ func (r *supplierManagementRepo) GetSuppliers(page, limit int, search string) ([
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
 	}
-	if err := query.Preload("City.Province").Preload("City").Limit(limit).Offset(offset).Find(&suppliers).Error; err != nil {
+	if err := query.Preload("City.Province").Preload("City").Limit(limit).Offset(offset).Order("id ASC").Find(&suppliers).Error; err != nil {
 		return nil, err
 	}
 	return suppliers, nil

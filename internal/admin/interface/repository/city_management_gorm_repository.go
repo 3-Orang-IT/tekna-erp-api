@@ -27,7 +27,7 @@ func (r *cityManagementRepo) GetCities(page, limit int, search string) ([]entity
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
 	}
-	if err := query.Preload("Province").Limit(limit).Offset(offset).Find(&cities).Error; err != nil {
+	if err := query.Preload("Province").Limit(limit).Offset(offset).Order("id ASC").Find(&cities).Error; err != nil {
 		return nil, err
 	}
 	return cities, nil

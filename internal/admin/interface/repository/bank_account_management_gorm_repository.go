@@ -29,7 +29,7 @@ func (r *bankAccountManagementRepo) GetBankAccounts(page, limit int, search stri
 			"%"+strings.ToLower(search)+"%", "%"+search+"%")
 	}
 	if err := query.Preload("City.Province").Preload("City").Preload("ChartOfAccount").
-		Limit(limit).Offset(offset).Find(&bankAccounts).Error; err != nil {
+		Limit(limit).Offset(offset).Order("id ASC").Find(&bankAccounts).Error; err != nil {
 		return nil, err
 	}
 	return bankAccounts, nil

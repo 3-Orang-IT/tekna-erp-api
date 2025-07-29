@@ -27,7 +27,7 @@ func (r *divisionManagementRepo) GetDivisions(page, limit int, search string) ([
 	if search != "" {
 		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
 	}
-	if err := query.Limit(limit).Offset(offset).Find(&divisions).Error; err != nil {
+	if err := query.Limit(limit).Offset(offset).Order("id ASC").Find(&divisions).Error; err != nil {
 		return nil, err
 	}
 	return divisions, nil
