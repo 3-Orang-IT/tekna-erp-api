@@ -72,6 +72,10 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	unitOfMeasureManagementRepo := adminRepositoryImpl.NewUnitOfMeasureManagementRepository(db)
 	unitOfMeasureManagementUsecase := adminUsecase.NewUnitOfMeasureManagementUsecase(unitOfMeasureManagementRepo)
 
+	// Area Management
+	areaManagementRepo := adminRepositoryImpl.NewAreaManagementRepository(db)
+	areaManagementUsecase := adminUsecase.NewAreaManagementUsecase(areaManagementRepo)
+
 	// Product Management
 	productManagementRepo := adminRepositoryImpl.NewProductManagementRepository(db)
 	productManagementUsecase := adminUsecase.NewProductManagementUsecase(productManagementRepo)
@@ -117,6 +121,7 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewChartOfAccountManagementHandler(r, chartOfAccountManagementUsecase, db)
 	adminHandler.NewBankAccountManagementHandler(r, bankAccountManagementUsecase, db)
 	adminHandler.NewToDoTemplateManagementHandler(r, toDoTemplateManagementUsecase, db)
+	adminHandler.NewAreaManagementHandler(r, areaManagementUsecase, db)
 
 	// Serve static files for uploaded profile images
 	r.Static("/uploads/profile", "./uploads/profile")
