@@ -37,6 +37,7 @@ var models = []interface{}{
 	&entity.Document{},
 	&entity.DocumentCategory{},
 	&entity.BudgetCategory{},
+	&entity.ProductCategoryAlternative{},
 }
 
 func DropTables(db *gorm.DB) {	

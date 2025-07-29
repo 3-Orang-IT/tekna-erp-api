@@ -151,6 +151,12 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewTravelCostManagementHandler(r, travelCostManagementUsecase, db)
 	adminHandler.NewBudgetCategoryManagementHandler(r, budgetCategoryManagementUsecase, db)
 
+	// Product Category Alternative Management
+	productCategoryAlternativeManagementRepo := adminRepositoryImpl.NewProductCategoryAlternativeManagementRepository(db)
+	productCategoryAlternativeManagementUsecase := adminUsecase.NewProductCategoryAlternativeManagementUsecase(productCategoryAlternativeManagementRepo)
+
+	adminHandler.NewProductCategoryAlternativeManagementHandler(r, productCategoryAlternativeManagementUsecase, db)
+
 	// Serve static files for uploads
 	r.Static("/uploads/profile", "./uploads/profile")
 	r.Static("/uploads/newsletters", "./uploads/newsletters")
