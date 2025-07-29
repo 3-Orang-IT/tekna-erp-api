@@ -5,7 +5,6 @@ type CreateCustomerInput struct {
 	AreaID            uint   `json:"area_id" binding:"required"`
 	CityID            uint   `json:"city_id" binding:"required"`
 	Name              string `json:"name" binding:"required"`
-	Code              string `json:"code" binding:"required"`
 	InvoiceName       string `json:"invoice_name" binding:"required"`
 	Address           string `json:"address" binding:"required"`
 	Phone             string `json:"phone"`

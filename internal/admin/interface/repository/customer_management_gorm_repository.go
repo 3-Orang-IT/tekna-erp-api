@@ -137,3 +137,15 @@ func (r *customerManagementRepo) GetUsers(page, limit int, search string) ([]ent
 	}
 	return users, nil
 }
+
+// GetLastCustomer retrieves the last customer record for code generation
+func (r *customerManagementRepo) GetLastCustomer() (*entity.Customer, error) {
+	var customer entity.Customer
+	if err := r.db.Order("id DESC").First(&customer).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &entity.Customer{ID: 0}, nil
+		}
+		return nil, err
+	}
+	return &customer, nil
+}

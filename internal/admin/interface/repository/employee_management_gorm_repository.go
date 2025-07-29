@@ -17,7 +17,23 @@ func NewEmployeeManagementRepository(db *gorm.DB) adminRepository.EmployeeManage
 }
 
 func (r *employeeManagementRepo) CreateEmployee(employee *entity.Employee) error {
-    return r.db.Create(employee).Error
+    // Start a transaction
+    return r.db.Transaction(func(tx *gorm.DB) error {
+        // Create the employee first
+        if err := tx.Create(employee).Error; err != nil {
+            return err
+        }
+        
+        // Handle area associations if any are provided
+        if len(employee.Area) > 0 {
+            // Replace will clear existing associations and create new ones
+            if err := tx.Model(employee).Association("Area").Replace(employee.Area); err != nil {
+                return err
+            }
+        }
+        
+        return nil
+    })
 }
 
 func (r *employeeManagementRepo) GetEmployees(page, limit int, search string) ([]entity.Employee, error) {
@@ -30,7 +46,7 @@ func (r *employeeManagementRepo) GetEmployees(page, limit int, search string) ([
         query = query.Joins("LEFT JOIN users ON users.id = employees.user_id").
             Where("LOWER(employees.nip) LIKE ? OR LOWER(employees.nik) LIKE ? OR LOWER(users.name) LIKE ?", searchStr, searchStr, searchStr)
     }
-    if err := query.Preload("User").Preload("JobPosition").Preload("Division").Preload("City").
+    if err := query.Preload("User").Preload("JobPosition").Preload("Division").Preload("City").Preload("Area").
 		Limit(limit).Offset(offset).Order("id ASC").Find(&employees).Error; err != nil {
         return nil, err
     }
@@ -39,21 +55,39 @@ func (r *employeeManagementRepo) GetEmployees(page, limit int, search string) ([
 
 func (r *employeeManagementRepo) GetEmployeeByID(id string) (*entity.Employee, error) {
     var employee entity.Employee
-    if err := r.db.Preload("User").Preload("JobPosition").Preload("Division").Preload("City").First(&employee, "id = ?", id).Error; err != nil {
+    if err := r.db.Preload("User").Preload("JobPosition").Preload("Division").Preload("City").Preload("Area").First(&employee, "id = ?", id).Error; err != nil {
         return nil, err
     }
     return &employee, nil
 }
 
 func (r *employeeManagementRepo) UpdateEmployee(id string, employee *entity.Employee) error {
-    var existingEmployee entity.Employee
-    if err := r.db.First(&existingEmployee, "id = ?", id).Error; err != nil {
-        if err == gorm.ErrRecordNotFound {
-            return gorm.ErrRecordNotFound
+    // Start a transaction
+    return r.db.Transaction(func(tx *gorm.DB) error {
+        // Find the existing employee
+        var existingEmployee entity.Employee
+        if err := tx.First(&existingEmployee, "id = ?", id).Error; err != nil {
+            if err == gorm.ErrRecordNotFound {
+                return gorm.ErrRecordNotFound
+            }
+            return err
         }
-        return err
-    }
-    return r.db.Model(&existingEmployee).Updates(employee).Error
+        
+        // Update employee fields
+        if err := tx.Model(&existingEmployee).Updates(employee).Error; err != nil {
+            return err
+        }
+        
+        // Handle area associations if any are provided
+        if len(employee.Area) > 0 {
+            // Replace will clear existing associations and create new ones
+            if err := tx.Model(&existingEmployee).Association("Area").Replace(employee.Area); err != nil {
+                return err
+            }
+        }
+        
+        return nil
+    })
 }
 
 func (r *employeeManagementRepo) DeleteEmployee(id string) error {
@@ -179,4 +213,20 @@ func (r *employeeManagementRepo) GetUsers(page, limit int, search string) ([]ent
         return nil, err
     }
     return users, nil
+}
+
+// GetAreas fetches areas for employee assignment
+func (r *employeeManagementRepo) GetAreas(page, limit int, search string) ([]entity.Area, error) {
+    var areas []entity.Area
+    offset := (page - 1) * limit
+    query := r.db
+    if search != "" {
+        // Search by area name
+        searchStr := "%" + strings.ToLower(search) + "%"
+        query = query.Where("LOWER(name) LIKE ?", searchStr)
+    }
+    if err := query.Limit(limit).Offset(offset).Order("name ASC").Find(&areas).Error; err != nil {
+        return nil, err
+    }
+    return areas, nil
 }

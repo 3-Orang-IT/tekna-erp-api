@@ -9,16 +9,20 @@ import (
 
 func SeedAreas(db *gorm.DB) error {
 	areas := []entity.Area{
-		{ID: 1, Name: "North Area"},
-		{ID: 2, Name: "South Area"},
-		{ID: 3, Name: "East Area"},
-		{ID: 4, Name: "West Area"},
+		{Name: "North Area"},
+		{Name: "South Area"},
+		{Name: "East Area"},
+		{Name: "West Area"},
 	}
 
 	for _, area := range areas {
-		if err := db.FirstOrCreate(&area, entity.Area{ID: area.ID}).Error; err != nil {
-			log.Printf("Error seeding area with ID %d: %v", area.ID, err)
-			return err
+		var existingArea entity.Area
+		if err := db.Where("name = ?", area.Name).First(&existingArea).Error; err == gorm.ErrRecordNotFound {
+			if err := db.Create(&area).Error; err != nil {
+				log.Printf("Error seeding area %s: %v", area.Name, err)
+				return err
+			}
+			log.Printf("Successfully added area %s", area.Name)
 		}
 	}
 

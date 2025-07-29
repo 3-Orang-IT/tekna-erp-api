@@ -69,6 +69,14 @@ func (h *EmployeeManagementHandler) CreateEmployee(c *gin.Context) {
         ContractStatus:    input.ContractStatus,
         Status:            input.Status,
     }
+    
+    // Handle area IDs if provided
+    if len(input.AreaIDs) > 0 {
+        // Convert area IDs to Area entities
+        for _, areaID := range input.AreaIDs {
+            employee.Area = append(employee.Area, entity.Area{ID: areaID})
+        }
+    }
 
     // Set default values if not provided
     if employee.Status == "" {
@@ -93,11 +101,15 @@ func (h *EmployeeManagementHandler) CreateEmployee(c *gin.Context) {
         return
     }
 
+    // Get base URL for photo profile
+    baseUrl := os.Getenv("BASE_URL")
+    
     // Format the response with related data
     response := dto.EmployeeResponse{
         ID:               createdEmployee.ID,
         UserID:           createdEmployee.UserID,
         Name:             createdEmployee.User.Name,
+        PhotoProfileURL:  baseUrl + createdEmployee.User.PhotoProfileURL,
         JobPosition:      createdEmployee.JobPosition.Name,
         Division:         createdEmployee.Division.Name,
         City:             createdEmployee.City.Name,
@@ -111,9 +123,18 @@ func (h *EmployeeManagementHandler) CreateEmployee(c *gin.Context) {
         KTPStatus:        createdEmployee.KTPStatus,
         ContractNo:       createdEmployee.ContractNo,
         NPWPStatus:       createdEmployee.NPWPStatus,
+        ContractStatus:   createdEmployee.ContractStatus,
+        Status:           createdEmployee.Status,
         CreatedAt:        createdEmployee.CreatedAt.Format("2006-01-02 15:04:05"),
         UpdatedAt:        createdEmployee.UpdatedAt.Format("2006-01-02 15:04:05"),
     }
+    
+    // Add area names to the response
+    var areaNames []string
+    for _, area := range createdEmployee.Area {
+        areaNames = append(areaNames, area.Name)
+    }
+    response.Area = areaNames
 
     c.JSON(http.StatusCreated, gin.H{
         "message": "employee created successfully", 
@@ -159,10 +180,16 @@ func (h *EmployeeManagementHandler) GetEmployees(c *gin.Context) {
 
     var responseData []dto.EmployeeResponse
     for _, employee := range employees {
+        // Extract area names
+        var areaNames []string
+        for _, area := range employee.Area {
+            areaNames = append(areaNames, area.Name)
+        }
+        
         responseData = append(responseData, dto.EmployeeResponse{
             ID:                employee.ID,
             UserID:            employee.UserID,
-			Name:              employee.User.Name,
+            Name:              employee.User.Name,
             PhotoProfileURL:   baseUrl + employee.User.PhotoProfileURL,
             JobPosition:       employee.JobPosition.Name,
             Division:          employee.Division.Name,
@@ -177,6 +204,9 @@ func (h *EmployeeManagementHandler) GetEmployees(c *gin.Context) {
             KTPStatus:         employee.KTPStatus,
             ContractNo:        employee.ContractNo,
             NPWPStatus:        employee.NPWPStatus,
+            ContractStatus:    employee.ContractStatus,
+            Status:            employee.Status,
+            Area:              areaNames,
             CreatedAt:         employee.CreatedAt.Format("2006-01-02 15:04:05"),
             UpdatedAt:         employee.UpdatedAt.Format("2006-01-02 15:04:05"),
         })
@@ -203,10 +233,19 @@ func (h *EmployeeManagementHandler) GetEmployeeByID(c *gin.Context) {
         return
     }
 
+    // Extract area names
+    var areaNames []string
+    for _, area := range employee.Area {
+        areaNames = append(areaNames, area.Name)
+    }
+    
+    baseUrl := os.Getenv("BASE_URL")
+    
     response := dto.EmployeeResponse{
         ID:                employee.ID,
         UserID:            employee.UserID,
-		Name:              employee.User.Name, // Assuming User entity has a Name field
+        Name:              employee.User.Name,
+        PhotoProfileURL:   baseUrl + employee.User.PhotoProfileURL,
         JobPosition:       employee.JobPosition.Name,
         Division:          employee.Division.Name,
         City:              employee.City.Name,
@@ -220,6 +259,9 @@ func (h *EmployeeManagementHandler) GetEmployeeByID(c *gin.Context) {
         KTPStatus:         employee.KTPStatus,
         ContractNo:        employee.ContractNo,
         NPWPStatus:        employee.NPWPStatus,
+        ContractStatus:    employee.ContractStatus,
+        Status:            employee.Status,
+        Area:              areaNames,
         CreatedAt:         employee.CreatedAt.Format("2006-01-02 15:04:05"),
         UpdatedAt:         employee.UpdatedAt.Format("2006-01-02 15:04:05"),
     }
@@ -256,6 +298,16 @@ func (h *EmployeeManagementHandler) UpdateEmployee(c *gin.Context) {
         KTPStatus:        input.KTPStatus,
         ContractNo:       input.ContractNo,
         NPWPStatus:       input.NPWPStatus,
+        ContractStatus:   input.ContractStatus,
+        Status:           input.Status,
+    }
+    
+    // Handle area IDs if provided
+    if len(input.AreaIDs) > 0 {
+        // Convert area IDs to Area entities
+        for _, areaID := range input.AreaIDs {
+            employee.Area = append(employee.Area, entity.Area{ID: areaID})
+        }
     }
 
     if err := h.usecase.UpdateEmployee(id, &employee); err != nil {
@@ -263,7 +315,48 @@ func (h *EmployeeManagementHandler) UpdateEmployee(c *gin.Context) {
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{"message": "employee updated successfully", "data": employee})
+    // Fetch the updated employee with its relations
+    updatedEmployee, err := h.usecase.GetEmployeeByID(id)
+    if err != nil {
+        c.JSON(http.StatusOK, gin.H{
+            "message": "employee updated successfully, but could not fetch updated details",
+            "data": employee,
+        })
+        return
+    }
+
+    // Format the response with related data
+    response := dto.EmployeeResponse{
+        ID:               updatedEmployee.ID,
+        UserID:           updatedEmployee.UserID,
+        Name:             updatedEmployee.User.Name,
+        JobPosition:      updatedEmployee.JobPosition.Name,
+        Division:         updatedEmployee.Division.Name,
+        City:             updatedEmployee.City.Name,
+        NIP:              updatedEmployee.NIP,
+        NIK:              updatedEmployee.NIK,
+        BPJSEmploymentNo: updatedEmployee.BPJSEmploymentNo,
+        BPJSHealthNo:     updatedEmployee.BPJSHealthNo,
+        Address:          updatedEmployee.Address,
+        Phone:            updatedEmployee.Phone,
+        JoinDate:         updatedEmployee.JoinDate,
+        KTPStatus:        updatedEmployee.KTPStatus,
+        ContractNo:       updatedEmployee.ContractNo,
+        NPWPStatus:       updatedEmployee.NPWPStatus,
+        ContractStatus:   updatedEmployee.ContractStatus,
+        Status:           updatedEmployee.Status,
+        CreatedAt:        updatedEmployee.CreatedAt.Format("2006-01-02 15:04:05"),
+        UpdatedAt:        updatedEmployee.UpdatedAt.Format("2006-01-02 15:04:05"),
+    }
+    
+    // Add area names to the response
+    var areaNames []string
+    for _, area := range updatedEmployee.Area {
+        areaNames = append(areaNames, area.Name)
+    }
+    response.Area = areaNames
+
+    c.JSON(http.StatusOK, gin.H{"message": "employee updated successfully", "data": response})
 }
 
 func (h *EmployeeManagementHandler) DeleteEmployee(c *gin.Context) {
@@ -357,6 +450,23 @@ func (h *EmployeeManagementHandler) GetEditEmployeePage(c *gin.Context) {
         })
     }
     
+    // Fetch areas for reference
+    areas, err := h.usecase.GetAreas(1, 1000, "")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    var areaList []dto.AreaResponse
+    for _, area := range areas {
+        areaList = append(areaList, dto.AreaResponse{
+            ID:   area.ID,
+            Name: area.Name,
+            CreatedAt: area.CreatedAt.Format("02-01-2006 15:04:05"),
+            UpdatedAt: area.UpdatedAt.Format("02-01-2006 15:04:05"),
+        })
+    }
+
     response := gin.H{
         "data": employee,
         "references": gin.H{
@@ -364,6 +474,7 @@ func (h *EmployeeManagementHandler) GetEditEmployeePage(c *gin.Context) {
             "divisions":     divisionList,
             "cities":        cityList,
             "provinces":     provinceList,
+            "areas":         areaList,
         },
     }
     c.JSON(http.StatusOK, response)
@@ -452,12 +563,30 @@ func (h *EmployeeManagementHandler) GetAddEmployeePage(c *gin.Context) {
         })
     }
 
+    // Fetch areas for reference
+    areas, err := h.usecase.GetAreas(1, 1000, "")
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    var areaList []dto.AreaResponse
+    for _, area := range areas {
+        areaList = append(areaList, dto.AreaResponse{
+            ID:   area.ID,
+            Name: area.Name,
+            CreatedAt: area.CreatedAt.Format("02-01-2006 15:04:05"),
+            UpdatedAt: area.UpdatedAt.Format("02-01-2006 15:04:05"),
+        })
+    }
+
     response := gin.H{
         "references": gin.H{
             "job_positions": jobPositionList,
             "divisions":     divisionList,
             "provinces":     provinceList,
             "users":         userList,
+            "areas":         areaList,
         },
     }
     c.JSON(http.StatusOK, response)
@@ -529,7 +658,17 @@ func (h *EmployeeManagementHandler) CreateEmployeeWithUser(c *gin.Context) {
     npwpStatus := c.PostForm("npwp_status")
     contractStatus := c.PostForm("contract_status")
     status := c.PostForm("status")
-    
+    areaIDs := c.PostFormArray("area_ids")
+
+    // Convert areaIDs from string array to uint array
+    var areaIDsUint []uint
+    for _, rid := range areaIDs {
+        id, err := strconv.ParseUint(rid, 10, 64)
+        if err == nil {
+            areaIDsUint = append(areaIDsUint, uint(id))
+        }
+    }
+
     // Validate required fields
     if username == "" || password == "" || name == "" || email == "" {
         c.JSON(http.StatusBadRequest, gin.H{"error": "username, password, name, and email are required"})
@@ -571,6 +710,13 @@ func (h *EmployeeManagementHandler) CreateEmployeeWithUser(c *gin.Context) {
         Status:            status,
     }
     
+    // Add area associations if area IDs were provided
+    if len(areaIDsUint) > 0 {
+        for _, areaID := range areaIDsUint {
+            employee.Area = append(employee.Area, entity.Area{ID: areaID})
+        }
+    }
+    
     // Set default values if not provided
     if employee.Status == "" {
         employee.Status = "active"
@@ -591,7 +737,42 @@ func (h *EmployeeManagementHandler) CreateEmployeeWithUser(c *gin.Context) {
         photoURL = baseUrl + user.PhotoProfileURL
     }
     
-    // Create a combined response
+    // Fetch the created employee with all its relations for a complete response
+    createdEmployee, err := h.usecase.GetEmployeeByID(strconv.FormatUint(uint64(employee.ID), 10))
+    if err != nil {
+        // If there's an error fetching the complete employee, return a basic response
+        response := gin.H{
+            "message": "user and employee created successfully, but could not fetch complete details",
+            "data": gin.H{
+                "user": gin.H{
+                    "id":               user.ID,
+                    "username":         user.Username,
+                    "name":             user.Name,
+                    "email":            user.Email,
+                    "photo_profile_url": photoURL,
+                },
+                "employee": gin.H{
+                    "id":               employee.ID,
+                    "user_id":          employee.UserID,
+                    "job_position_id":  employee.JobPositionID,
+                    "division_id":      employee.DivisionID,
+                    "city_id":          employee.CityID,
+                    "nip":              employee.NIP,
+                    "nik":              employee.NIK,
+                },
+            },
+        }
+        c.JSON(http.StatusCreated, response)
+        return
+    }
+    
+    // Extract area names for the response
+    var areaNames []string
+    for _, area := range createdEmployee.Area {
+        areaNames = append(areaNames, area.Name)
+    }
+
+    // Create a detailed response with all employee information
     response := gin.H{
         "message": "user and employee created successfully",
         "data": gin.H{
@@ -603,13 +784,27 @@ func (h *EmployeeManagementHandler) CreateEmployeeWithUser(c *gin.Context) {
                 "photo_profile_url": photoURL,
             },
             "employee": gin.H{
-                "id":               employee.ID,
-                "user_id":          employee.UserID,
-                "job_position_id":  employee.JobPositionID,
-                "division_id":      employee.DivisionID,
-                "city_id":          employee.CityID,
-                "nip":              employee.NIP,
-                "nik":              employee.NIK,
+                "id":               createdEmployee.ID,
+                "user_id":          createdEmployee.UserID,
+                "name":             createdEmployee.User.Name,
+                "job_position":     createdEmployee.JobPosition.Name,
+                "division":         createdEmployee.Division.Name,
+                "city":             createdEmployee.City.Name,
+                "nip":              createdEmployee.NIP,
+                "nik":              createdEmployee.NIK,
+                "bpjs_employment_no": createdEmployee.BPJSEmploymentNo,
+                "bpjs_health_no":   createdEmployee.BPJSHealthNo,
+                "address":          createdEmployee.Address,
+                "phone":            createdEmployee.Phone,
+                "join_date":        createdEmployee.JoinDate,
+                "ktp_status":       createdEmployee.KTPStatus,
+                "contract_no":      createdEmployee.ContractNo,
+                "npwp_status":      createdEmployee.NPWPStatus,
+                "contract_status":  createdEmployee.ContractStatus,
+                "status":           createdEmployee.Status,
+                "area":             areaNames,
+                "created_at":       createdEmployee.CreatedAt.Format("2006-01-02 15:04:05"),
+                "updated_at":       createdEmployee.UpdatedAt.Format("2006-01-02 15:04:05"),
             },
         },
     }

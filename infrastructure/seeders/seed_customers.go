@@ -10,12 +10,11 @@ import (
 func SeedCustomers(db *gorm.DB) error {
 	customers := []entity.Customer{
 		{
-			ID:                1,
 			UserID:            1,
 			AreaID:            1,
 			CityID:            1,
 			Name:              "PT Sukses Selalu",
-			Code:              "CUST-001",
+			Code:              "CUST-1",
 			InvoiceName:       "PT Sukses Selalu",
 			Address:           "Jl. Merdeka No. 1",
 			Phone:             "081234567890",
@@ -36,7 +35,6 @@ func SeedCustomers(db *gorm.DB) error {
 			Level:             "Gold",
 		},
 		{
-			ID:                2,
 			UserID:            1,
 			AreaID:            2,
 			CityID:            2,

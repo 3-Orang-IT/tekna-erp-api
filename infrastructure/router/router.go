@@ -72,6 +72,10 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	unitOfMeasureManagementRepo := adminRepositoryImpl.NewUnitOfMeasureManagementRepository(db)
 	unitOfMeasureManagementUsecase := adminUsecase.NewUnitOfMeasureManagementUsecase(unitOfMeasureManagementRepo)
 
+	// Area Management
+	areaManagementRepo := adminRepositoryImpl.NewAreaManagementRepository(db)
+	areaManagementUsecase := adminUsecase.NewAreaManagementUsecase(areaManagementRepo)
+
 	// Product Management
 	productManagementRepo := adminRepositoryImpl.NewProductManagementRepository(db)
 	productManagementUsecase := adminUsecase.NewProductManagementUsecase(productManagementRepo)
@@ -96,6 +100,26 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	toDoTemplateManagementRepo := adminRepositoryImpl.NewToDoTemplateManagementRepository(db)
 	toDoTemplateManagementUsecase := adminUsecase.NewToDoTemplateManagementUsecase(toDoTemplateManagementRepo)
 
+	// Newsletter Management
+	newsletterManagementRepo := adminRepositoryImpl.NewNewsletterManagementRepository(db)
+	newsletterManagementUsecase := adminUsecase.NewNewsletterManagementUsecase(newsletterManagementRepo)
+	
+	// Document Category Management
+	documentCategoryManagementRepo := adminRepositoryImpl.NewDocumentCategoryManagementRepository(db)
+	documentCategoryManagementUsecase := adminUsecase.NewDocumentCategoryManagementUsecase(documentCategoryManagementRepo)
+	
+	// Document Management
+	documentManagementRepo := adminRepositoryImpl.NewDocumentManagementRepository(db)
+	documentManagementUsecase := adminUsecase.NewDocumentManagementUsecase(documentManagementRepo)
+	
+	// Travel Cost Management
+	travelCostManagementRepo := adminRepositoryImpl.NewTravelCostManagementRepository(db)
+	travelCostManagementUsecase := adminUsecase.NewTravelCostManagementUsecase(travelCostManagementRepo)
+
+	// Budget Category Management
+	budgetCategoryManagementRepo := adminRepositoryImpl.NewBudgetCategoryManagementRepository(db)
+	budgetCategoryManagementUsecase := adminUsecase.NewBudgetCategoryManagementUsecase(budgetCategoryManagementRepo)
+
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
 	adminHandler.NewUserManagementHandler(r, userManagementUsecase, db)
@@ -104,6 +128,12 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewDivisionManagementHandler(r, devisionManagementUsecase, db)
 	adminHandler.NewCompanyManagementHandler(r, companyManagementUsecase, db)
 	adminHandler.NewProvinceManagementHandler(r, provinceManagementUsecase, db)
+	// Register Newsletter handler
+	adminHandler.NewNewsletterManagementHandler(r, newsletterManagementUsecase, db)
+	// Register Document Category handler
+	adminHandler.NewDocumentCategoryManagementHandler(r, documentCategoryManagementUsecase, db)
+	// Register Document handler
+	adminHandler.NewDocumentManagementHandler(r, documentManagementUsecase, db)
 	// Register Employee handler
 	adminHandler.NewEmployeeManagementHandler(r, employeeManagementUsecase, db)
 	adminHandler.NewCityManagementHandler(r, cityManagementUsecase, db)
@@ -117,9 +147,20 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewChartOfAccountManagementHandler(r, chartOfAccountManagementUsecase, db)
 	adminHandler.NewBankAccountManagementHandler(r, bankAccountManagementUsecase, db)
 	adminHandler.NewToDoTemplateManagementHandler(r, toDoTemplateManagementUsecase, db)
+	adminHandler.NewAreaManagementHandler(r, areaManagementUsecase, db)
+	adminHandler.NewTravelCostManagementHandler(r, travelCostManagementUsecase, db)
+	adminHandler.NewBudgetCategoryManagementHandler(r, budgetCategoryManagementUsecase, db)
 
-	// Serve static files for uploaded profile images
+	// Product Category Alternative Management
+	productCategoryAlternativeManagementRepo := adminRepositoryImpl.NewProductCategoryAlternativeManagementRepository(db)
+	productCategoryAlternativeManagementUsecase := adminUsecase.NewProductCategoryAlternativeManagementUsecase(productCategoryAlternativeManagementRepo)
+
+	adminHandler.NewProductCategoryAlternativeManagementHandler(r, productCategoryAlternativeManagementUsecase, db)
+
+	// Serve static files for uploads
 	r.Static("/uploads/profile", "./uploads/profile")
+	r.Static("/uploads/newsletters", "./uploads/newsletters")
+	r.Static("/uploads/documents", "./uploads/documents")
 
 	return r
 }

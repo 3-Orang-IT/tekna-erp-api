@@ -88,6 +88,21 @@ func Seed(db *gorm.DB) {
 			return err
 		}
 
+		if err := SeedNewsletters(tx); err != nil {
+			log.Printf("Error seeding newsletters: %v", err)
+			return err
+		}
+
+		if err := SeedDocumentCategories(tx); err != nil {
+			log.Printf("Error seeding document categories: %v", err)
+			return err
+		}
+
+		if err := SeedDocuments(tx); err != nil {
+			log.Printf("Error seeding documents: %v", err)
+			return err
+		}
+
 		if err := SeedBankAccounts(tx); err != nil {
 			log.Printf("Error seeding bank accounts: %v", err)
 			return err
@@ -95,6 +110,16 @@ func Seed(db *gorm.DB) {
 
 		if err := SeedToDoTemplates(tx); err != nil {
 			log.Printf("Error seeding to-do templates: %v", err)
+			return err
+		}
+
+		if err := SeedBudgetCategories(tx); err != nil {
+			log.Printf("Error seeding budget categories: %v", err)
+			return err
+		}
+
+		if err := SeedTravelCosts(tx); err != nil {
+			log.Printf("Error seeding travel costs: %v", err)
 			return err
 		}
 
