@@ -10,4 +10,7 @@ type CustomerManagementRepository interface {
 	DeleteCustomer(id string) error
 	GetCities(page, limit int, search string) ([]entity.City, error) // For edit page reference
 	GetCustomersCount(search string) (int64, error) // Method to get total count of customers for pagination
+	GetProvinces(page, limit int, search string) ([]entity.Province, error) // Method for fetching provinces with cities
+	GetAreas(page, limit int, search string) ([]entity.Area, error) // Method for fetching areas
+	GetUsers(page, limit int, search string) ([]entity.User, error) // Method for fetching users
 }

@@ -94,3 +94,45 @@ func (r *customerManagementRepo) GetCustomersCount(search string) (int64, error)
 	}
 	return count, nil
 }
+
+// GetProvinces fetches provinces with their cities for the customer form
+func (r *customerManagementRepo) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
+	var provinces []entity.Province
+	offset := (page - 1) * limit
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Preload("Cities").Limit(limit).Offset(offset).Find(&provinces).Error; err != nil {
+		return nil, err
+	}
+	return provinces, nil
+}
+
+// GetAreas fetches areas for the customer form
+func (r *customerManagementRepo) GetAreas(page, limit int, search string) ([]entity.Area, error) {
+	var areas []entity.Area
+	offset := (page - 1) * limit
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Limit(limit).Offset(offset).Find(&areas).Error; err != nil {
+		return nil, err
+	}
+	return areas, nil
+}
+
+// GetUsers fetches users for the customer form
+func (r *customerManagementRepo) GetUsers(page, limit int, search string) ([]entity.User, error) {
+	var users []entity.User
+	offset := (page - 1) * limit
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Limit(limit).Offset(offset).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}

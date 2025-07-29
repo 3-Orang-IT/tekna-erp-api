@@ -12,6 +12,9 @@ type SupplierManagementUsecase interface {
 	UpdateSupplier(id string, supplier *entity.Supplier) error
 	DeleteSupplier(id string) error
 	GetSuppliersCount(search string) (int64, error) // Method to get total count of suppliers for pagination
+	GetCities(page, limit int, search string) ([]entity.City, error) // Method for fetching cities
+	GetProvinces(page, limit int, search string) ([]entity.Province, error) // Method for fetching provinces with cities
+	GetUsers(page, limit int, search string) ([]entity.User, error) // Method for fetching users
 }
 
 type supplierManagementUsecase struct {
@@ -45,4 +48,19 @@ func (u *supplierManagementUsecase) DeleteSupplier(id string) error {
 // GetSuppliersCount gets the total count of suppliers for pagination
 func (u *supplierManagementUsecase) GetSuppliersCount(search string) (int64, error) {
 	return u.repo.GetSuppliersCount(search)
+}
+
+// GetCities gets the cities for the supplier form
+func (u *supplierManagementUsecase) GetCities(page, limit int, search string) ([]entity.City, error) {
+	return u.repo.GetCities(page, limit, search)
+}
+
+// GetProvinces gets the provinces with their cities for the supplier form
+func (u *supplierManagementUsecase) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
+	return u.repo.GetProvinces(page, limit, search)
+}
+
+// GetUsers gets the users for the supplier form
+func (u *supplierManagementUsecase) GetUsers(page, limit int, search string) ([]entity.User, error) {
+	return u.repo.GetUsers(page, limit, search)
 }

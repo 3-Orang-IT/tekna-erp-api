@@ -14,6 +14,7 @@ type BankAccountManagementUsecase interface {
 	DeleteBankAccount(id string) error
 	GetCities(page, limit int, search string) ([]entity.City, error)
 	GetChartOfAccounts(page, limit int, search string) ([]entity.ChartOfAccount, error)
+	GetProvinces(page, limit int, search string) ([]entity.Province, error) // Method for fetching provinces with cities
 }
 
 type bankAccountManagementUsecase struct {
@@ -54,4 +55,9 @@ func (u *bankAccountManagementUsecase) GetCities(page, limit int, search string)
 
 func (u *bankAccountManagementUsecase) GetChartOfAccounts(page, limit int, search string) ([]entity.ChartOfAccount, error) {
 	return u.repo.GetChartOfAccounts(page, limit, search)
+}
+
+// GetProvinces fetches provinces with their cities for the bank account form
+func (u *bankAccountManagementUsecase) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
+	return u.repo.GetProvinces(page, limit, search)
 }

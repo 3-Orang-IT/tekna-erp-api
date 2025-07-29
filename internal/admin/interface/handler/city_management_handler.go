@@ -20,6 +20,7 @@ func NewCityManagementHandler(r *gin.Engine, uc adminUsecase.CityManagementUseca
 	h := &CityManagementHandler{uc}
 	admin := r.Group("/api/v1/admin")
 	admin.Use(middleware.AdminRoleMiddleware(db))
+	admin.GET("/cities/add", h.GetAddCityPage)
 	admin.POST("/cities", h.CreateCity)
 	admin.GET("/cities", h.GetCities)
 	admin.GET("/cities/:id", h.GetCityByID)
@@ -46,6 +47,33 @@ func (h *CityManagementHandler) CreateCity(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "city created successfully", "data": city})
+}
+
+func (h *CityManagementHandler) GetAddCityPage(c *gin.Context) {
+	// Fetch list of provinces
+	provinces, err := h.usecase.GetProvinces(1, 100, "") // Assuming a method exists to fetch provinces
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var provinceList []dto.ProvinceResponse
+	for _, province := range provinces {
+		provinceList = append(provinceList, dto.ProvinceResponse{
+			ID:   province.ID,
+			Name: province.Name,
+			CreatedAt: province.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: province.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	response := gin.H{
+		"data": gin.H{
+			"provinces": provinceList,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *CityManagementHandler) GetCities(c *gin.Context) {

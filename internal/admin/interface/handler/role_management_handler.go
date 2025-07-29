@@ -19,6 +19,7 @@ type RoleManagementHandler struct {
 func NewRoleManagementHandler(r *gin.Engine, uc adminUsecase.RoleManagementUsecase, db *gorm.DB) {
 	h := &RoleManagementHandler{uc}
 	admin := r.Group("/api/v1/admin")
+	admin.GET("/roles/add", h.GetAddRolePage)
 	admin.Use(middleware.AdminRoleMiddleware(db))
 	admin.POST("/roles", h.CreateRole)
 	admin.GET("/roles", h.GetRoles)
@@ -194,6 +195,23 @@ func (h *RoleManagementHandler) GetRoleEditPage(c *gin.Context) {
 			Menus: role.Menus,
 		},
 		"reference": gin.H{
+			"menus": menus,
+		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": response})
+}
+
+func (h *RoleManagementHandler) GetAddRolePage(c *gin.Context) {
+	// Fetch all menus for the role creation form
+	var menus []entity.Menu
+	if err := h.usecase.GetAllMenus(&menus); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	response := gin.H{
+		"data": gin.H{
 			"menus": menus,
 		},
 	}

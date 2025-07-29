@@ -102,3 +102,17 @@ func (r *bankAccountManagementRepo) GetChartOfAccounts(page, limit int, search s
 	}
 	return chartOfAccounts, nil
 }
+
+// GetProvinces fetches provinces with their cities for the bank account form
+func (r *bankAccountManagementRepo) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
+	var provinces []entity.Province
+	offset := (page - 1) * limit
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Preload("Cities").Limit(limit).Offset(offset).Find(&provinces).Error; err != nil {
+		return nil, err
+	}
+	return provinces, nil
+}

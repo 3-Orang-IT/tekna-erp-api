@@ -27,6 +27,7 @@ func NewUserManagementHandler(r *gin.Engine, uc adminUsecase.UserManagementUseca
 	h := &UserManagementHandler{uc}
 	admin := r.Group("/api/v1/admin")
 	admin.Use(middleware.AdminRoleMiddleware(db))
+	admin.GET("/users/add", h.GetAddUserPage) // Get roles for user creation form
 	admin.POST("/users", h.CreateUser)
 	admin.GET("/users", h.GetUsers)
 	admin.GET("/users/:id", h.GetUserByID)
@@ -403,4 +404,22 @@ func (h *UserManagementHandler) GetEditUserPage(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *UserManagementHandler) GetAddUserPage(c *gin.Context) {
+	roles, err := h.usecase.GetAllRoles()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch roles"})
+		return
+	}
+
+	var roleResponses []dto.RoleResponseOnlyName
+	for _, role := range roles {
+		roleResponses = append(roleResponses, dto.RoleResponseOnlyName{
+			ID:   role.ID,
+			Name: role.Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"roles": roleResponses}})
 }

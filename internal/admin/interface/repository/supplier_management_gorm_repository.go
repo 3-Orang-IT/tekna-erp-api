@@ -72,3 +72,45 @@ func (r *supplierManagementRepo) GetSuppliersCount(search string) (int64, error)
 	}
 	return count, nil
 }
+
+// GetCities fetches cities for the supplier form
+func (r *supplierManagementRepo) GetCities(page, limit int, search string) ([]entity.City, error) {
+	var cities []entity.City
+	offset := (page - 1) * limit
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Preload("Province").Limit(limit).Offset(offset).Find(&cities).Error; err != nil {
+		return nil, err
+	}
+	return cities, nil
+}
+
+// GetProvinces fetches provinces with their cities for the supplier form
+func (r *supplierManagementRepo) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
+	var provinces []entity.Province
+	offset := (page - 1) * limit
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Preload("Cities").Limit(limit).Offset(offset).Find(&provinces).Error; err != nil {
+		return nil, err
+	}
+	return provinces, nil
+}
+
+// GetUsers fetches users for the supplier form
+func (r *supplierManagementRepo) GetUsers(page, limit int, search string) ([]entity.User, error) {
+	var users []entity.User
+	offset := (page - 1) * limit
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Limit(limit).Offset(offset).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}

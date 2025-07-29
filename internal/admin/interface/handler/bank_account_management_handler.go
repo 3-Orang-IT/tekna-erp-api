@@ -22,6 +22,7 @@ func NewBankAccountManagementHandler(r *gin.Engine, uc adminUsecase.BankAccountM
 	admin.Use(middleware.AdminRoleMiddleware(db))
 	admin.POST("/bank-accounts", h.CreateBankAccount)
 	admin.GET("/bank-accounts", h.GetBankAccounts)
+	admin.GET("/bank-accounts/add", h.GetAddBankAccountPage) // New route for add page
 	admin.GET("/bank-accounts/:id", h.GetBankAccountByID)
 	admin.GET("/bank-accounts/:id/edit", h.GetEditBankAccountPage)
 	admin.PUT("/bank-accounts/:id", h.UpdateBankAccount)
@@ -254,4 +255,58 @@ func (h *BankAccountManagementHandler) DeleteBankAccount(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "bank account deleted successfully", "data": gin.H{"id": id}})
+}
+
+// GetAddBankAccountPage returns necessary reference data for the add bank account page
+func (h *BankAccountManagementHandler) GetAddBankAccountPage(c *gin.Context) {
+	// Fetch provinces with their cities
+	provinces, err := h.usecase.GetProvinces(1, 1000, "")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Transform the data to the desired response structure
+	var provincesWithCities []dto.ProvinceResponseWithCity
+	for _, province := range provinces {
+		// Create a province object with cities
+		provinceObj := dto.ProvinceResponseWithCity{
+			ID:   province.ID,
+			Name: province.Name,
+		}
+		
+		// Get cities for this province
+		var citiesList []dto.CityWithoutProvinceResponse
+		for _, city := range province.Cities {
+			citiesList = append(citiesList, dto.CityWithoutProvinceResponse{
+				ID:   city.ID,
+				Name: city.Name,
+			})
+		}
+		provinceObj.Cities = citiesList
+		provincesWithCities = append(provincesWithCities, provinceObj)
+	}
+
+	// Fetch list of chart of accounts
+	chartOfAccounts, err := h.usecase.GetChartOfAccounts(1, 1000, "")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var chartOfAccountList []dto.ChartOfAccountResponse
+	for _, coa := range chartOfAccounts {
+		chartOfAccountList = append(chartOfAccountList, dto.ChartOfAccountResponse{
+			ID:   coa.ID,
+			Code: coa.Code,
+			Name: coa.Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"provinces": provincesWithCities,
+			"chart_of_accounts": chartOfAccountList,
+		},
+	})
 }
