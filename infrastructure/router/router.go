@@ -103,6 +103,10 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	// Newsletter Management
 	newsletterManagementRepo := adminRepositoryImpl.NewNewsletterManagementRepository(db)
 	newsletterManagementUsecase := adminUsecase.NewNewsletterManagementUsecase(newsletterManagementRepo)
+	
+	// Document Category Management
+	documentCategoryManagementRepo := adminRepositoryImpl.NewDocumentCategoryManagementRepository(db)
+	documentCategoryManagementUsecase := adminUsecase.NewDocumentCategoryManagementUsecase(documentCategoryManagementRepo)
 
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
@@ -114,6 +118,8 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewProvinceManagementHandler(r, provinceManagementUsecase, db)
 	// Register Newsletter handler
 	adminHandler.NewNewsletterManagementHandler(r, newsletterManagementUsecase, db)
+	// Register Document Category handler
+	adminHandler.NewDocumentCategoryManagementHandler(r, documentCategoryManagementUsecase, db)
 	// Register Employee handler
 	adminHandler.NewEmployeeManagementHandler(r, employeeManagementUsecase, db)
 	adminHandler.NewCityManagementHandler(r, cityManagementUsecase, db)
