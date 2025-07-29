@@ -107,6 +107,10 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	// Document Category Management
 	documentCategoryManagementRepo := adminRepositoryImpl.NewDocumentCategoryManagementRepository(db)
 	documentCategoryManagementUsecase := adminUsecase.NewDocumentCategoryManagementUsecase(documentCategoryManagementRepo)
+	
+	// Document Management
+	documentManagementRepo := adminRepositoryImpl.NewDocumentManagementRepository(db)
+	documentManagementUsecase := adminUsecase.NewDocumentManagementUsecase(documentManagementRepo)
 
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
@@ -120,6 +124,8 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewNewsletterManagementHandler(r, newsletterManagementUsecase, db)
 	// Register Document Category handler
 	adminHandler.NewDocumentCategoryManagementHandler(r, documentCategoryManagementUsecase, db)
+	// Register Document handler
+	adminHandler.NewDocumentManagementHandler(r, documentManagementUsecase, db)
 	// Register Employee handler
 	adminHandler.NewEmployeeManagementHandler(r, employeeManagementUsecase, db)
 	adminHandler.NewCityManagementHandler(r, cityManagementUsecase, db)
@@ -138,6 +144,7 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	// Serve static files for uploads
 	r.Static("/uploads/profile", "./uploads/profile")
 	r.Static("/uploads/newsletters", "./uploads/newsletters")
+	r.Static("/uploads/documents", "./uploads/documents")
 
 	return r
 }
