@@ -100,6 +100,10 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	toDoTemplateManagementRepo := adminRepositoryImpl.NewToDoTemplateManagementRepository(db)
 	toDoTemplateManagementUsecase := adminUsecase.NewToDoTemplateManagementUsecase(toDoTemplateManagementRepo)
 
+	// Newsletter Management
+	newsletterManagementRepo := adminRepositoryImpl.NewNewsletterManagementRepository(db)
+	newsletterManagementUsecase := adminUsecase.NewNewsletterManagementUsecase(newsletterManagementRepo)
+
 	// Register handler ke router
 	handler.NewAuthHandler(r, authUsecase, db)
 	adminHandler.NewUserManagementHandler(r, userManagementUsecase, db)
@@ -108,6 +112,8 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewDivisionManagementHandler(r, devisionManagementUsecase, db)
 	adminHandler.NewCompanyManagementHandler(r, companyManagementUsecase, db)
 	adminHandler.NewProvinceManagementHandler(r, provinceManagementUsecase, db)
+	// Register Newsletter handler
+	adminHandler.NewNewsletterManagementHandler(r, newsletterManagementUsecase, db)
 	// Register Employee handler
 	adminHandler.NewEmployeeManagementHandler(r, employeeManagementUsecase, db)
 	adminHandler.NewCityManagementHandler(r, cityManagementUsecase, db)
@@ -123,8 +129,9 @@ func InitRoutes(db *gorm.DB) *gin.Engine {
 	adminHandler.NewToDoTemplateManagementHandler(r, toDoTemplateManagementUsecase, db)
 	adminHandler.NewAreaManagementHandler(r, areaManagementUsecase, db)
 
-	// Serve static files for uploaded profile images
+	// Serve static files for uploads
 	r.Static("/uploads/profile", "./uploads/profile")
+	r.Static("/uploads/newsletters", "./uploads/newsletters")
 
 	return r
 }

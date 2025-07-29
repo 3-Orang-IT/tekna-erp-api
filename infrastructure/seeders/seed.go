@@ -88,6 +88,11 @@ func Seed(db *gorm.DB) {
 			return err
 		}
 
+		if err := SeedNewsletters(tx); err != nil {
+			log.Printf("Error seeding newsletters: %v", err)
+			return err
+		}
+
 		if err := SeedBankAccounts(tx); err != nil {
 			log.Printf("Error seeding bank accounts: %v", err)
 			return err
