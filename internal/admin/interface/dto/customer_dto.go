@@ -57,6 +57,7 @@ type CustomerResponse struct {
 	Code        string `json:"code"`
 	City        string `json:"city"`
 	Province    string `json:"province"`
+	Segment     string `json:"segment"`
 	Area        string `json:"area"`
 	Type        string `json:"type"`
 	Level       string `json:"level"`

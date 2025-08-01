@@ -13,7 +13,6 @@ type CreateProductInput struct {
 	PurchasePrice     float64 `json:"purchase_price" binding:"required"`
 	SellingPrice      float64 `json:"selling_price" binding:"required"`
 	IsRecommended     bool    `json:"is_recommended"`
-	ProductType       string  `json:"product_type"`
 	ProductFocus      string  `json:"product_focus"`
 	Brand             string  `json:"brand"`
 }

@@ -36,7 +36,7 @@ func SeedProducts(db *gorm.DB) error {
 
 	productsList := []entity.Product{
 		{
-			ProductCategoryID: productCategory.ID,
+			ProductCategoryID: &productCategory.ID,
 			SupplierID:        supplier.ID,
 			BusinessUnitID:    businessUnit.ID,
 			UnitID:            unit.ID,
@@ -55,7 +55,6 @@ func SeedProducts(db *gorm.DB) error {
 			Packaging:         "Box",
 			BrochureLink:      "http://example.com/brochure_smartphone_x",
 			IsRecommended:     true,
-			ProductType:       "Electronics",
 			ProductFocus:      "Consumer",
 			Brand:             "BrandX",
 		},

@@ -43,6 +43,7 @@ func (h *RoleManagementHandler) CreateRole(c *gin.Context) {
 
 	role := entity.Role{
 		Name:  input.Name,
+		Code: input.Code,
 		Menus: menus,
 	}
 
@@ -93,6 +94,7 @@ func (h *RoleManagementHandler) GetRoles(c *gin.Context) {
 		responseData = append(responseData, dto.RoleResponse{
 			ID:   role.ID,
 			Name: role.Name,
+			Code: role.Code,
 			Menus: role.Menus,
 			CreatedAt: role.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt: role.UpdatedAt.Format("2006-01-02 15:04:05"),
@@ -152,6 +154,7 @@ func (h *RoleManagementHandler) UpdateRole(c *gin.Context) {
 	role := entity.Role{
 		ID:    uint(idUint),
 		Name:  input.Name,
+		Code:  input.Code,
 		Menus: menus,
 	}
 
