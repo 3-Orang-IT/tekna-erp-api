@@ -36,7 +36,7 @@ func SeedProducts(db *gorm.DB) error {
 
 	productsList := []entity.Product{
 		{
-			ProductCategoryID: productCategory.ID,
+			ProductCategoryID: &productCategory.ID,
 			SupplierID:        supplier.ID,
 			BusinessUnitID:    businessUnit.ID,
 			UnitID:            unit.ID,

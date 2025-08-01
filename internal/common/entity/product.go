@@ -4,7 +4,7 @@ import "time"
 
 type Product struct {
 	ID                uint      `gorm:"primaryKey" json:"id"`
-	ProductCategoryID uint      `gorm:"not null" json:"product_category_id"`
+	ProductCategoryID *uint      `gorm:"index" json:"product_category_id"`
 	SupplierID        uint      `gorm:"not null" json:"supplier_id"`
 	BusinessUnitID    uint      `gorm:"not null" json:"business_unit_id"`
 	UnitID            uint      `gorm:"not null" json:"unit_id"`

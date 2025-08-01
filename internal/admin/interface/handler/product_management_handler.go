@@ -37,7 +37,7 @@ func (h *ProductManagementHandler) CreateProduct(c *gin.Context) {
 	}
 
 	product := entity.Product{
-		ProductCategoryID: input.ProductCategoryID,
+		ProductCategoryID: &input.ProductCategoryID,
 		SupplierID:        input.SupplierID,
 		BusinessUnitID:    input.BusinessUnitID,
 		UnitID:            input.UnitID,
