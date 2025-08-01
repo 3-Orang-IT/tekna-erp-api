@@ -122,6 +122,7 @@ func (h *CustomerManagementHandler) GetCustomers(c *gin.Context) {
 			Code:        customer.Code,
 			City:        customer.City.Name,
 			Province:    customer.City.Province.Name,
+			Segment:     customer.Segment,
 			Area:        customer.Area.Name,
 			Type:        customer.Type,
 			Level:       customer.Level,
