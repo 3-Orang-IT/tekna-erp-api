@@ -49,7 +49,6 @@ func (h *ProductManagementHandler) CreateProduct(c *gin.Context) {
 		PurchasePrice:     input.PurchasePrice,
 		SellingPrice:      input.SellingPrice,
 		IsRecommended:     input.IsRecommended,
-		ProductType:       input.ProductType,
 		ProductFocus:      input.ProductFocus,
 		Brand:             input.Brand,
 	}
@@ -82,7 +81,6 @@ func (h *ProductManagementHandler) CreateProduct(c *gin.Context) {
 		PurchasePrice:     product.PurchasePrice,
 		SellingPrice:      product.SellingPrice,
 		IsRecommended:     product.IsRecommended,
-		ProductType:       product.ProductType,
 		ProductFocus:      product.ProductFocus,
 		Brand:             product.Brand,
 	}
@@ -139,7 +137,6 @@ func (h *ProductManagementHandler) GetProducts(c *gin.Context) {
 			PurchasePrice:     product.PurchasePrice,
 			SellingPrice:      product.SellingPrice,
 			IsRecommended:     product.IsRecommended,
-			ProductType:       product.ProductType,
 			ProductFocus:      product.ProductFocus,
 			Brand:             product.Brand,
 			CreatedAt:         product.CreatedAt.Format("2006-01-02 15:04:05"),
