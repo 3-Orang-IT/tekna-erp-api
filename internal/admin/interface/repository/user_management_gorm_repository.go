@@ -24,10 +24,14 @@ func (r *userManagementRepo) CreateUser(user *entity.User) error {
 	return r.db.Create(user).Error
 }
 
-func (r *userManagementRepo) GetUsers(page, limit int) ([]entity.User, error) {
+func (r *userManagementRepo) GetUsers(page, limit int, search string) ([]entity.User, error) {
 	var users []entity.User
 	offset := (page - 1) * limit
-	if err := r.db.Preload("Role").Limit(limit).Offset(offset).Find(&users).Error; err != nil {
+	query := r.db.Preload("Role").Limit(limit).Offset(offset).Order("id ASC")
+	if search != "" {
+		query = query.Where("username LIKE ? OR email LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+	if err := query.Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -68,4 +72,25 @@ func (r *userManagementRepo) DeleteUser(id string) error {
 	}
 
 	return r.db.Delete(&user).Error // Proceed to delete if user exists
+}
+
+func (r *userManagementRepo) GetAllRoles() ([]entity.Role, error) {
+	var roles []entity.Role
+	if err := r.db.Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	return roles, nil
+}
+
+// Method to get total count of users for pagination
+func (r *userManagementRepo) GetUsersCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.User{})
+	if search != "" {
+		query = query.Where("username LIKE ? OR email LIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }

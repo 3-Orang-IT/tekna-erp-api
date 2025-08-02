@@ -23,6 +23,7 @@ func NewDivisionManagementHandler(r *gin.Engine, uc adminUsecase.DivisionManagem
 	admin.POST("/divisions", h.CreateDivision)
 	admin.GET("/divisions", h.GetDivisions)
 	admin.GET("/divisions/:id", h.GetDivisionByID)
+	admin.GET("/divisions/:id/edit", h.GetDivisionEditPage)
 	admin.PUT("/divisions/:id", h.UpdateDivision)
 	admin.DELETE("/divisions/:id", h.DeleteDivision)
 }
@@ -59,13 +60,47 @@ func (h *DivisionManagementHandler) GetDivisions(c *gin.Context) {
 		return
 	}
 
-	divisions, err := h.usecase.GetDivisions(page, limit)
+	search := c.DefaultQuery("search", "")
+	
+	// Get total count of divisions for pagination
+	total, err := h.usecase.GetDivisionsCount(search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": divisions, "page": page, "limit": limit})
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+	
+	divisions, err := h.usecase.GetDivisions(page, limit, search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Format the response data
+	var responseData []dto.DivisionResponse
+	for _, division := range divisions {
+		responseData = append(responseData, dto.DivisionResponse{
+			ID:        division.ID,
+			Name:      division.Name,
+			CreatedAt: division.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: division.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": responseData,
+		"pagination": gin.H{
+			"page": page, 
+			"limit": limit,
+			"total_data": total,
+			"total_pages": totalPages,
+		},
+	})
 }
 
 func (h *DivisionManagementHandler) GetDivisionByID(c *gin.Context) {
@@ -80,6 +115,17 @@ func (h *DivisionManagementHandler) GetDivisionByID(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{"data": division})
+}
+
+// GetDivisionEditPage returns division data for the edit page
+func (h *DivisionManagementHandler) GetDivisionEditPage(c *gin.Context) {
+	id := c.Param("id")
+	division, err := h.usecase.GetDivisionByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": division})
 }
 

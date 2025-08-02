@@ -9,10 +9,10 @@ import (
 
 func SeedRoles(db *gorm.DB) error {
 	rolesList := []entity.Role{
-		{Name: "Admin"},
-		{Name: "Team Support"},
-		{Name: "HRD"},
-		{Name: "Supplier"},
+		{Name: "Admin", Code: "admin"},
+		{Name: "Team Support", Code: "team_support"},
+		{Name: "HRD", Code: "hrd"},
+		{Name: "Supplier", Code: "supplier"},
 	}
 
 	for _, role := range rolesList {

@@ -17,15 +17,28 @@ type ProvinceManagementHandler struct {
 }
 
 func NewProvinceManagementHandler(r *gin.Engine, uc adminUsecase.ProvinceManagementUsecase, db *gorm.DB) {
-	h := &ProvinceManagementHandler{uc}
-	admin := r.Group("/api/v1/admin")
-	admin.Use(middleware.AdminRoleMiddleware(db))
-	admin.POST("/provinces", h.CreateProvince)
-	admin.GET("/provinces", h.GetProvinces)
-	admin.GET("/provinces/:id", h.GetProvinceByID)
-	admin.PUT("/provinces/:id", h.UpdateProvince)
-	admin.DELETE("/provinces/:id", h.DeleteProvince)
+	   h := &ProvinceManagementHandler{uc}
+	   admin := r.Group("/api/v1/admin")
+	   admin.Use(middleware.AdminRoleMiddleware(db))
+	   admin.POST("/provinces", h.CreateProvince)
+	   admin.GET("/provinces", h.GetProvinces)
+	   admin.GET("/provinces/:id", h.GetProvinceByID)
+	   admin.GET("/provinces/:id/edit", h.GetProvinceEditPage)
+	   admin.PUT("/provinces/:id", h.UpdateProvince)
+	   admin.DELETE("/provinces/:id", h.DeleteProvince)
 }
+
+// GetProvinceEditPage returns province data for the edit page
+func (h *ProvinceManagementHandler) GetProvinceEditPage(c *gin.Context) {
+	   id := c.Param("id")
+	   province, err := h.usecase.GetProvinceByID(id)
+	   if err != nil {
+			   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			   return
+	   }
+	   c.JSON(http.StatusOK, gin.H{"data": province})
+}
+
 
 func (h *ProvinceManagementHandler) CreateProvince(c *gin.Context) {
 	var input dto.CreateProvinceInput
@@ -47,33 +60,59 @@ func (h *ProvinceManagementHandler) CreateProvince(c *gin.Context) {
 }
 
 func (h *ProvinceManagementHandler) GetProvinces(c *gin.Context) {
-	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
-	if err != nil || page < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page parameter"})
-		return
-	}
+	   page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	   if err != nil || page < 1 {
+			   c.JSON(http.StatusBadRequest, gin.H{"error": "invalid page parameter"})
+			   return
+	   }
 
-	limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
-	if err != nil || limit < 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit parameter"})
-		return
-	}
+	   limit, err := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	   if err != nil || limit < 1 {
+			   c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit parameter"})
+			   return
+	   }
 
-	provinces, err := h.usecase.GetProvinces(page, limit)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	   search := c.DefaultQuery("search", "")
 
-	response := gin.H{
-		"data": provinces,
-		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
-		},
-	}
+	   provinces, err := h.usecase.GetProvinces(page, limit, search)
+	   if err != nil {
+			   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			   return
+	   }
+	   var responseData []dto.ProvinceResponse
+	   for _, province := range provinces {
+		   responseData = append(responseData, dto.ProvinceResponse{
+			   ID:   province.ID,
+			   Name: province.Name,
+			   CreatedAt: province.CreatedAt.Format("2006-01-02 15:04:05"),
+			   UpdatedAt: province.UpdatedAt.Format("2006-01-02 15:04:05"),
+		   })
+	   }
 
-	c.JSON(http.StatusOK, response)
+	   // Get total count for pagination
+	   totalData, err := h.usecase.GetProvincesCount(search)
+	   if err != nil {
+			   c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			   return
+	   }
+
+	   // Calculate total pages
+	   totalPages := int(totalData) / limit
+	   if int(totalData)%limit > 0 {
+			   totalPages++
+	   }
+
+	   response := gin.H{
+			   "data": responseData,
+			   "pagination": gin.H{
+					   "page":        page,
+					   "limit":       limit,
+					   "total_data":  totalData,
+					   "total_pages": totalPages,
+			   },
+	   }
+
+	   c.JSON(http.StatusOK, response)
 }
 
 func (h *ProvinceManagementHandler) GetProvinceByID(c *gin.Context) {

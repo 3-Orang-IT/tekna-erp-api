@@ -20,9 +20,11 @@ func NewCityManagementHandler(r *gin.Engine, uc adminUsecase.CityManagementUseca
 	h := &CityManagementHandler{uc}
 	admin := r.Group("/api/v1/admin")
 	admin.Use(middleware.AdminRoleMiddleware(db))
+	admin.GET("/cities/add", h.GetAddCityPage)
 	admin.POST("/cities", h.CreateCity)
 	admin.GET("/cities", h.GetCities)
 	admin.GET("/cities/:id", h.GetCityByID)
+	admin.GET("/cities/:id/edit", h.GetEditCityPage)
 	admin.PUT("/cities/:id", h.UpdateCity)
 	admin.DELETE("/cities/:id", h.DeleteCity)
 }
@@ -47,6 +49,33 @@ func (h *CityManagementHandler) CreateCity(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "city created successfully", "data": city})
 }
 
+func (h *CityManagementHandler) GetAddCityPage(c *gin.Context) {
+	// Fetch list of provinces
+	provinces, err := h.usecase.GetProvinces(1, 100, "") // Assuming a method exists to fetch provinces
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var provinceList []dto.ProvinceResponse
+	for _, province := range provinces {
+		provinceList = append(provinceList, dto.ProvinceResponse{
+			ID:   province.ID,
+			Name: province.Name,
+			CreatedAt: province.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: province.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	response := gin.H{
+		"data": gin.H{
+			"provinces": provinceList,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *CityManagementHandler) GetCities(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil || page < 1 {
@@ -60,10 +89,25 @@ func (h *CityManagementHandler) GetCities(c *gin.Context) {
 		return
 	}
 
-	cities, err := h.usecase.GetCities(page, limit)
+	search := c.DefaultQuery("search", "") // Added search query parameter
+
+	cities, err := h.usecase.GetCities(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+
+	// Get total count for pagination
+	totalData, err := h.usecase.GetCitiesCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(totalData) / limit
+	if int(totalData)%limit > 0 {
+		totalPages++
 	}
 
 	var responseData []dto.CityResponse
@@ -71,15 +115,19 @@ func (h *CityManagementHandler) GetCities(c *gin.Context) {
 		responseData = append(responseData, dto.CityResponse{
 			ID:       city.ID,
 			Name:     city.Name,
-			Province: city.Province,
+			Province: city.Province.Name,
+			CreatedAt: city.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: city.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 
 	response := gin.H{
 		"data": responseData,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
+			"page":        page,
+			"limit":       limit,
+			"total_data":  totalData,
+			"total_pages": totalPages,
 		},
 	}
 
@@ -133,4 +181,39 @@ func (h *CityManagementHandler) DeleteCity(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "city deleted successfully", "data": gin.H{"id": id}})
+}
+
+func (h *CityManagementHandler) GetEditCityPage(c *gin.Context) {
+	id := c.Param("id")
+
+	// Fetch city by ID
+	city, err := h.usecase.GetCityByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Fetch list of provinces
+	provinces, err := h.usecase.GetProvinces(1, 100, "") // Assuming a method exists to fetch provinces
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var provinceList []dto.ProvinceResponse
+	for _, province := range provinces {
+		provinceList = append(provinceList, dto.ProvinceResponse{
+			ID:   province.ID,
+			Name: province.Name,
+		})
+	}
+
+	response := gin.H{
+		"data": city,
+		"refrences": gin.H{
+			"provinces": provinceList,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
 }

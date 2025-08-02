@@ -1,6 +1,8 @@
 package adminRepositoryImpl
 
 import (
+	"strings"
+
 	adminRepository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"gorm.io/gorm"
@@ -18,10 +20,16 @@ func (r *roleManagementRepo) CreateRole(role *entity.Role) error {
 	return r.db.Create(role).Error
 }
 
-func (r *roleManagementRepo) GetRoles(page, limit int) ([]entity.Role, error) {
+func (r *roleManagementRepo) GetRoles(page, limit int, search string) ([]entity.Role, error) {
 	var roles []entity.Role
 	offset := (page - 1) * limit
-	if err := r.db.Preload("Menus").Limit(limit).Offset(offset).Find(&roles).Error; err != nil {
+	query := r.db.Preload("Menus").Limit(limit).Offset(offset).Order("id ASC")
+
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+
+	if err := query.Find(&roles).Error; err != nil {
 		return nil, err
 	}
 	return roles, nil
@@ -52,4 +60,24 @@ func (r *roleManagementRepo) DeleteRole(id string) error {
 		return err
 	}
 	return r.db.Delete(&role).Error
+}
+
+func (r *roleManagementRepo) GetAllMenus(menus *[]entity.Menu) error {
+	if err := r.db.Find(menus).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// Method to get total count of roles for pagination
+func (r *roleManagementRepo) GetRolesCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.Role{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }

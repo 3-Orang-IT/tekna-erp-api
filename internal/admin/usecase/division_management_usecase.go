@@ -7,10 +7,12 @@ import (
 
 type DivisionManagementUsecase interface {
 	CreateDivision(division *entity.Division) error
-	GetDivisions(page, limit int) ([]entity.Division, error)
+	GetDivisions(page, limit int, search string) ([]entity.Division, error)
 	GetDivisionByID(id string) (*entity.Division, error)
 	UpdateDivision(id string, division *entity.Division) error
 	DeleteDivision(id string) error
+	// Method to get total count of divisions for pagination
+	GetDivisionsCount(search string) (int64, error)
 }
 
 type divisionManagementUsecase struct {
@@ -25,8 +27,12 @@ func (u *divisionManagementUsecase) CreateDivision(division *entity.Division) er
 	return u.repo.CreateDivision(division)
 }
 
-func (u *divisionManagementUsecase) GetDivisions(page, limit int) ([]entity.Division, error) {
-	return u.repo.GetDivisions(page, limit)
+func (u *divisionManagementUsecase) GetDivisions(page, limit int, search string) ([]entity.Division, error) {
+	divisions, err := u.repo.GetDivisions(page, limit, search)
+	if err != nil {
+		return nil, err
+	}
+	return divisions, nil
 }
 
 func (u *divisionManagementUsecase) GetDivisionByID(id string) (*entity.Division, error) {
@@ -39,4 +45,9 @@ func (u *divisionManagementUsecase) UpdateDivision(id string, division *entity.D
 
 func (u *divisionManagementUsecase) DeleteDivision(id string) error {
 	return u.repo.DeleteDivision(id)
+}
+
+// GetDivisionsCount gets the total count of divisions for pagination
+func (u *divisionManagementUsecase) GetDivisionsCount(search string) (int64, error) {
+	return u.repo.GetDivisionsCount(search)
 }

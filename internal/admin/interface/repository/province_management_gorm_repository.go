@@ -1,6 +1,8 @@
 package adminRepositoryImpl
 
 import (
+	"strings"
+
 	adminRepository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"gorm.io/gorm"
@@ -18,13 +20,29 @@ func (r *provinceManagementRepo) CreateProvince(province *entity.Province) error
 	return r.db.Create(province).Error
 }
 
-func (r *provinceManagementRepo) GetProvinces(page, limit int) ([]entity.Province, error) {
+func (r *provinceManagementRepo) GetProvinces(page, limit int, search string) ([]entity.Province, error) {
 	var provinces []entity.Province
 	offset := (page - 1) * limit
-	if err := r.db.Limit(limit).Offset(offset).Find(&provinces).Error; err != nil {
+	query := r.db
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Limit(limit).Offset(offset).Order("id ASC").Find(&provinces).Error; err != nil {
 		return nil, err
 	}
 	return provinces, nil
+}
+
+func (r *provinceManagementRepo) GetProvincesCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.Province{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (r *provinceManagementRepo) GetProvinceByID(id string) (*entity.Province, error) {

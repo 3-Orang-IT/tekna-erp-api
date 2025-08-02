@@ -11,7 +11,7 @@ var models = []interface{}{
 	&entity.User{},
 	&entity.Role{},
 	&entity.Menu{},
-	&entity.Modul{},
+	&entity.Area{},
 	&entity.Company{},
 	&entity.City{},
 	&entity.Province{},
@@ -36,9 +36,11 @@ var models = []interface{}{
 	&entity.ChartOfAccount{},
 	&entity.Document{},
 	&entity.DocumentCategory{},
+	&entity.BudgetCategory{},
+	&entity.ProductCategoryAlternative{},
 }
 
-func DropTables(db *gorm.DB) {
+func DropTables(db *gorm.DB) {	
     err := db.Migrator().DropTable(models...)
     if err != nil {
         log.Fatalf("Gagal drop table: %v", err)

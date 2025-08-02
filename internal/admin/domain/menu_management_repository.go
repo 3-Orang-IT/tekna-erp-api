@@ -4,8 +4,9 @@ import "github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 
 type MenuManagementRepository interface {
 	CreateMenu(menu *entity.Menu) error
-	GetMenus(page, limit int) ([]entity.Menu, error)
+	GetMenus(page, limit int, search string) ([]entity.Menu, error)
 	GetMenuByID(id string) (*entity.Menu, error)
 	UpdateMenu(id string, menu *entity.Menu) error
 	DeleteMenu(id string) error
+	GetMenusCount(search string) (int64, error) // Method to get total count of menus for pagination
 }

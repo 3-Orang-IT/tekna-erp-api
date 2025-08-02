@@ -7,6 +7,10 @@ import (
 	"strconv"
 	"strings"
 
+	"io"
+	"os"
+	"time"
+
 	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/interface/dto"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/admin/middleware"
 	adminUsecase "github.com/3-Orang-IT/tekna-erp-api/internal/admin/usecase"
@@ -23,11 +27,13 @@ func NewUserManagementHandler(r *gin.Engine, uc adminUsecase.UserManagementUseca
 	h := &UserManagementHandler{uc}
 	admin := r.Group("/api/v1/admin")
 	admin.Use(middleware.AdminRoleMiddleware(db))
+	admin.GET("/users/add", h.GetAddUserPage) // Get roles for user creation form
 	admin.POST("/users", h.CreateUser)
 	admin.GET("/users", h.GetUsers)
 	admin.GET("/users/:id", h.GetUserByID)
 	admin.PUT("/users/:id", h.UpdateUser)
 	admin.DELETE("/users/:id", h.DeleteUser)
+	admin.GET("/users/:id/edit", h.GetEditUserPage)
 }
 
 func validateUser(user *entity.User) error {
@@ -44,24 +50,65 @@ func validateUser(user *entity.User) error {
 }
 
 func (h *UserManagementHandler) CreateUser(c *gin.Context) {
-	var input dto.CreateUserInput
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// Parse form-data (multipart)
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil { // 10MB max
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse multipart form: " + err.Error()})
 		return
 	}
 
-	user := entity.User{
-		Username:        input.Username,
-		Password:        input.Password,
-		Name:            input.Name,
-		Email:           input.Email,
-		Telp:            input.Telp,
-		PhotoProfileURL: input.PhotoProfileURL,
-		Status:          input.Status,
+	// Get fields from form-data
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	name := c.PostForm("name")
+	email := c.PostForm("email")
+	telp := c.PostForm("telp")
+	status := c.PostForm("status")
+	roleIDs := c.PostFormArray("roles")
+
+	// Handle file upload
+	file, header, err := c.Request.FormFile("photo_profile")
+	var photoProfileURL string
+	if err == nil && header != nil {
+		sanitizedFilename := strings.ReplaceAll(header.Filename, " ", "_")
+		filename := fmt.Sprintf("%d_%s", time.Now().UnixNano(), sanitizedFilename)
+		savePath := fmt.Sprintf("uploads/profile/%s", filename)
+		// Ensure directory exists
+		if err := ensureDir("uploads/profile"); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create upload directory: " + err.Error()})
+			return
+		}
+		out, err := os.Create(savePath)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save file: " + err.Error()})
+			return
+		}
+		defer out.Close()
+		if _, err := io.Copy(out, file); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to write file: " + err.Error()})
+			return
+		}
+		photoProfileURL = savePath
 	}
 
-	for _, roleID := range input.RoleIDs {
+	// Convert roleIDs to []uint
+	var roleIDsUint []uint
+	for _, rid := range roleIDs {
+		id, err := strconv.ParseUint(rid, 10, 64)
+		if err == nil {
+			roleIDsUint = append(roleIDsUint, uint(id))
+		}
+	}
+
+	user := entity.User{
+		Username:        username,
+		Password:        password,
+		Name:            name,
+		Email:           email,
+		Telp:            telp,
+		PhotoProfileURL: photoProfileURL,
+		Status:          status,
+	}
+	for _, roleID := range roleIDsUint {
 		user.Role = append(user.Role, entity.Role{ID: roleID})
 	}
 
@@ -78,6 +125,15 @@ func (h *UserManagementHandler) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "user created successfully", "data": user})
 }
 
+// ensureDir creates a directory if it does not exist
+func ensureDir(dirName string) error {
+	err := os.MkdirAll(dirName, os.ModePerm)
+	if err != nil && !os.IsExist(err) {
+		return err
+	}
+	return nil
+}
+
 func (h *UserManagementHandler) GetUsers(c *gin.Context) {
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil || page < 1 {
@@ -91,17 +147,41 @@ func (h *UserManagementHandler) GetUsers(c *gin.Context) {
 		return
 	}
 
-	users, err := h.usecase.GetUsers(page, limit)
+	search := c.DefaultQuery("search", "") // Added search query parameter
+
+	// Get total count of users for pagination
+	total, err := h.usecase.GetUsersCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+
+	users, err := h.usecase.GetUsers(page, limit, search)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	var userResponses []dto.UserResponse
+
+	baseUrl := os.Getenv("BASE_URL")
 	for _, user := range users {
 		var roleNames []string
 		for _, role := range user.Role {
 			roleNames = append(roleNames, role.Name)
+		}
+
+		var photoURL string
+		if user.PhotoProfileURL != "" {
+			photoURL = baseUrl + user.PhotoProfileURL
+		} else {
+			photoURL = ""
 		}
 
 		userResponses = append(userResponses, dto.UserResponse{
@@ -110,19 +190,21 @@ func (h *UserManagementHandler) GetUsers(c *gin.Context) {
 			Name:            user.Name,
 			Email:           user.Email,
 			Telp:            user.Telp,
-			PhotoProfileURL: user.PhotoProfileURL,
+			PhotoProfileURL: photoURL,
 			Status:          user.Status,
 			Roles:           roleNames,
-			CreatedAt:       user.CreatedAt,
-			UpdatedAt:       user.UpdatedAt,
+			CreatedAt:       user.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:       user.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 
 	response := gin.H{
 		"data": userResponses,
 		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
+			"page":       page,
+			"limit":      limit,
+			"total_data": total,
+			"total_pages": totalPages,
 		},
 	}
 
@@ -142,6 +224,14 @@ func (h *UserManagementHandler) GetUserByID(c *gin.Context) {
 	for _, role := range user.Role {
 		roleNames = append(roleNames, role.Name)
 	}
+	
+	baseUrl := os.Getenv("BASE_URL")
+	var photoURL string
+	if user.PhotoProfileURL != "" {
+		photoURL = baseUrl + user.PhotoProfileURL
+	} else {
+		photoURL = ""
+	}
 
 	// Map ke response DTO
 	userResponse := dto.UserResponse{
@@ -150,11 +240,11 @@ func (h *UserManagementHandler) GetUserByID(c *gin.Context) {
 		Name:            user.Name,
 		Email:           user.Email,
 		Telp:            user.Telp,
-		PhotoProfileURL: user.PhotoProfileURL,
+		PhotoProfileURL: photoURL,
 		Status:          user.Status,
 		Roles:           roleNames,
-		CreatedAt:       user.CreatedAt,
-		UpdatedAt:       user.UpdatedAt,
+		CreatedAt:       user.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:       user.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": userResponse})
@@ -162,26 +252,68 @@ func (h *UserManagementHandler) GetUserByID(c *gin.Context) {
 
 func (h *UserManagementHandler) UpdateUser(c *gin.Context) {
 	id := c.Param("id")
-	var input dto.UpdateUserInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+	// Parse form-data (multipart)
+	if err := c.Request.ParseMultipartForm(10 << 20); err != nil { // 10MB max
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse multipart form: " + err.Error()})
 		return
 	}
 
-	// Mapping input ke entity.User
-	var roles []entity.Role
-	for _, roleID := range input.RoleIDs {
-		roles = append(roles, entity.Role{ID: roleID})
+	// Get fields from form-data
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	name := c.PostForm("name")
+	telp := c.PostForm("telp")
+	status := c.PostForm("status")
+	roleIDs := c.PostFormArray("roles")
+
+	// Handle file upload
+	file, header, err := c.Request.FormFile("photo_profile")
+	var photoProfileURL string
+	if err == nil && header != nil {
+		sanitizedFilename := strings.ReplaceAll(header.Filename, " ", "_")
+		filename := fmt.Sprintf("%d_%s", time.Now().UnixNano(), sanitizedFilename)
+		savePath := fmt.Sprintf("uploads/profile/%s", filename)
+		// Ensure directory exists
+		if err := ensureDir("uploads/profile"); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create upload directory: " + err.Error()})
+			return
+		}
+		out, err := os.Create(savePath)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save file: " + err.Error()})
+			return
+		}
+		defer out.Close()
+		if _, err := io.Copy(out, file); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to write file: " + err.Error()})
+			return
+		}
+		photoProfileURL = savePath
+	} else {
+		// If no new file uploaded, keep the old value if provided
+		photoProfileURL = c.PostForm("photo_profile_url")
+	}
+
+	// Convert roleIDs to []uint
+	var roleIDsUint []uint
+	for _, rid := range roleIDs {
+		idUint, err := strconv.ParseUint(rid, 10, 64)
+		if err == nil {
+			roleIDsUint = append(roleIDsUint, uint(idUint))
+		}
 	}
 
 	user := entity.User{
-		Username:        input.Username,
-		Password:        input.Password,
-		Name:            input.Name,
-		Telp:            input.Telp,
-		PhotoProfileURL: input.PhotoProfileURL,
-		Status:          input.Status,
-		Role:            roles,
+		Username:        username,
+		Password:        password,
+		Name:            name,
+		Telp:            telp,
+		PhotoProfileURL: photoProfileURL,
+		Status:          status,
+	}
+	for _, roleID := range roleIDsUint {
+		user.Role = append(user.Role, entity.Role{ID: roleID})
 	}
 
 	// Panggil usecase
@@ -212,4 +344,82 @@ func (h *UserManagementHandler) DeleteUser(c *gin.Context) {
 		"message": "user deleted successfully",
 		"data": gin.H{"id": id},
 	})
+}
+
+func (h *UserManagementHandler) GetEditUserPage(c *gin.Context) {
+	id := c.Param("id")
+	user, err := h.usecase.GetUserByID(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	// Fetch all roles
+	roles, err := h.usecase.GetAllRoles()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch roles"})
+		return
+	}
+
+	// Map roles to response format
+	var roleResponses []dto.RoleResponse
+	for _, role := range roles {
+		roleResponses = append(roleResponses, dto.RoleResponse{
+			ID:   role.ID,
+			Name: role.Name,
+		})
+	}
+
+	// Convert roles to []string
+	var roleNames []string
+	for _, role := range user.Role {
+		roleNames = append(roleNames, role.Name)
+	}
+	
+	baseUrl := os.Getenv("BASE_URL")
+	var photoURL string
+	if user.PhotoProfileURL != "" {
+		photoURL = baseUrl + user.PhotoProfileURL
+	} else {
+		photoURL = ""
+	}
+
+	// Map ke response DTO
+	response := gin.H{
+		"data": gin.H{
+			"id":              user.ID,
+			"username":        user.Username,
+			"name":            user.Name,
+			"email":           user.Email,
+			"telp":            user.Telp,
+			"photo_profile_url": photoURL,
+			"status":          user.Status,
+			"roles":           roleNames,
+			"created_at":      user.CreatedAt,
+			"updated_at":      user.UpdatedAt,
+		},
+		"reference": gin.H{
+			"roles":    roleResponses,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *UserManagementHandler) GetAddUserPage(c *gin.Context) {
+	roles, err := h.usecase.GetAllRoles()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch roles"})
+		return
+	}
+
+	var roleResponses []dto.RoleResponseOnlyName
+	for _, role := range roles {
+		roleResponses = append(roleResponses, dto.RoleResponseOnlyName{
+			ID:   role.ID,
+			Name: role.Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": gin.H{"roles": roleResponses}})
 }

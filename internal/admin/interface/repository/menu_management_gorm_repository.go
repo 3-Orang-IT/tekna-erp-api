@@ -1,6 +1,8 @@
 package adminRepositoryImpl
 
 import (
+	"strings"
+
 	adminRepository "github.com/3-Orang-IT/tekna-erp-api/internal/admin/domain"
 	"github.com/3-Orang-IT/tekna-erp-api/internal/common/entity"
 	"gorm.io/gorm"
@@ -18,10 +20,16 @@ func (r *menuManagementRepo) CreateMenu(menu *entity.Menu) error {
 	return r.db.Create(menu).Error
 }
 
-func (r *menuManagementRepo) GetMenus(page, limit int) ([]entity.Menu, error) {
+func (r *menuManagementRepo) GetMenus(page, limit int, search string) ([]entity.Menu, error) {
 	var menus []entity.Menu
 	offset := (page - 1) * limit
-	if err := r.db.Limit(limit).Offset(offset).Find(&menus).Error; err != nil {
+	query := r.db.Limit(limit).Offset(offset).Order("id ASC")
+
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+
+	if err := query.Find(&menus).Error; err != nil {
 		return nil, err
 	}
 	return menus, nil
@@ -52,4 +60,17 @@ func (r *menuManagementRepo) DeleteMenu(id string) error {
 		return err
 	}
 	return r.db.Delete(&menu).Error
+}
+
+// Method to get total count of menus for pagination
+func (r *menuManagementRepo) GetMenusCount(search string) (int64, error) {
+	var count int64
+	query := r.db.Model(&entity.Menu{})
+	if search != "" {
+		query = query.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(search)+"%")
+	}
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }

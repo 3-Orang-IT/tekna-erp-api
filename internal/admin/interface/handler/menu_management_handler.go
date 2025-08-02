@@ -20,11 +20,13 @@ func NewMenuManagementHandler(r *gin.Engine, uc adminUsecase.MenuManagementUseca
 	h := &MenuManagementHandler{uc}
 	admin := r.Group("/api/v1/admin")
 	admin.Use(middleware.AdminRoleMiddleware(db))
+	admin.GET("/menus/add", h.GetAddMenuPage)
 	admin.POST("/menus", h.CreateMenu)
 	admin.GET("/menus", h.GetMenus)
 	admin.GET("/menus/:id", h.GetMenuByID)
 	admin.PUT("/menus/:id", h.UpdateMenu)
 	admin.DELETE("/menus/:id", h.DeleteMenu)
+	admin.GET("/menus/:id/edit", h.GetEditMenuPage) // New route for edit page
 }
 
 func (h *MenuManagementHandler) CreateMenu(c *gin.Context) {
@@ -40,7 +42,6 @@ func (h *MenuManagementHandler) CreateMenu(c *gin.Context) {
 		Icon:     input.Icon,
 		Order:    input.Order,
 		ParentID: input.ParentID,
-		ModulID:  input.ModulID,
 	}
 
 	if err := h.usecase.CreateMenu(&menu); err != nil {
@@ -64,18 +65,64 @@ func (h *MenuManagementHandler) GetMenus(c *gin.Context) {
 		return
 	}
 
-	menus, err := h.usecase.GetMenus(page, limit)
+	search := c.DefaultQuery("search", "") // Added search query parameter
+
+	// Get total count of menus for pagination
+	total, err := h.usecase.GetMenusCount(search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Calculate total pages
+	totalPages := int(total) / limit
+	if int(total)%limit > 0 {
+		totalPages++
+	}
+
+	menus, err := h.usecase.GetMenus(page, limit, search)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	// Prepare response data
+	responseData := make([]dto.MenuResponse, 0, len(menus))
+	for _, menu := range menus {
+		responseData = append(responseData, dto.MenuResponse{
+			ID:       menu.ID,
+			Name:     menu.Name,
+			URL:      menu.URL,
+			Icon:     menu.Icon,
+			Order:    menu.Order,
+			ParentID: menu.ParentID,
+			CreatedAt: menu.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt: menu.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	response := gin.H{
+		"data": responseData,
+		"pagination": gin.H{
+			"page":        page,
+			"limit":       limit,
+			"total_data":  total,
+			"total_pages": totalPages,
+		},
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *MenuManagementHandler) GetAddMenuPage(c *gin.Context) {
+	// Fetch necessary data for the add menu page, e.g., parent menus
+	parentMenus, err := h.usecase.GetMenus(1, 10000, "") // Fetch all menus for parent selection	
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	response := gin.H{
-		"data": menus,
-		"pagination": gin.H{
-			"page":  page,
-			"limit": limit,
-		},
+		"data": parentMenus,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -113,7 +160,6 @@ func (h *MenuManagementHandler) UpdateMenu(c *gin.Context) {
 		Icon:     input.Icon,
 		Order:    input.Order,
 		ParentID: input.ParentID,
-		ModulID:  input.ModulID,
 	}
 
 	if err := h.usecase.UpdateMenu(id, &menu); err != nil {
@@ -132,4 +178,19 @@ func (h *MenuManagementHandler) DeleteMenu(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "menu deleted successfully", "data": gin.H{"id": id}})
+}
+
+func (h *MenuManagementHandler) GetEditMenuPage(c *gin.Context) {
+	id := c.Param("id")
+	menu, err := h.usecase.GetMenuByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	response := gin.H{
+		"data":    menu,
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": response})
 }
